@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace RecorderByKyleSmith
+namespace SimpleRecord
 {
     public partial class App : Application
     {

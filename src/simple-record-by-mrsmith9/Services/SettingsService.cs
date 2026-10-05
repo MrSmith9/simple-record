@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using RecorderByKyleSmith.Models;
+using SimpleRecord.Models;
 
-namespace RecorderByKyleSmith.Services
+namespace SimpleRecord.Services
 {
     /// <summary>
     /// Loads and saves <see cref="AppSettings"/> as a small JSON file in the
@@ -21,8 +21,13 @@ namespace RecorderByKyleSmith.Services
     {
         private static readonly string SettingsFilePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "Recording by Kyle Smith",
+            "Simple Record",
             "settings.json");
+
+        private static readonly string BackgroundImageFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "Simple Record",
+            "Background");
 
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
@@ -76,6 +81,63 @@ namespace RecorderByKyleSmith.Services
             catch
             {
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Copies a user-chosen image into the app's own AppData folder, so
+        /// it keeps working even if the original file is later moved,
+        /// renamed, or deleted. Overwrites any previously chosen background
+        /// image. Returns the new stored path to save into
+        /// <see cref="AppSettings.BackgroundImagePath"/>, or null if the
+        /// copy failed (e.g. disk full, no permission, file in use) - the
+        /// caller should keep whatever background was set before in that case.
+        /// </summary>
+        public static string? SaveBackgroundImage(string sourceFilePath)
+        {
+            try
+            {
+                Directory.CreateDirectory(BackgroundImageFolder);
+
+                // Clear out any previously saved background first, in case
+                // it used a different file extension than the new one -
+                // otherwise both copies would sit there taking up space.
+                DeleteBackgroundImage();
+
+                string extension = Path.GetExtension(sourceFilePath);
+                string destinationPath = Path.Combine(BackgroundImageFolder, "background" + extension);
+                File.Copy(sourceFilePath, destinationPath, overwrite: true);
+                return destinationPath;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Deletes the stored background image copy, if one exists. Never
+        /// throws - if it can't be deleted for some reason, it's simply
+        /// left there, which does no harm beyond a little leftover disk
+        /// space (it's only ever read when <see cref="AppSettings.BackgroundImagePath"/>
+        /// still points at it).
+        /// </summary>
+        public static void DeleteBackgroundImage()
+        {
+            try
+            {
+                if (Directory.Exists(BackgroundImageFolder))
+                {
+                    foreach (string file in Directory.GetFiles(BackgroundImageFolder))
+                    {
+                        File.Delete(file);
+                    }
+                }
+            }
+            catch
+            {
+                // Not being able to delete the old file isn't harmful
+                // enough to bother the user with an error about it.
             }
         }
     }

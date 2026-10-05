@@ -1,4 +1,4 @@
-# Recording by Kyle Smith
+# Simple Record
 
 A Windows desktop screen recorder, built step by step in Visual Studio using
 C# and WPF (.NET 8).
@@ -10,11 +10,14 @@ startup update check (Part 8). See the full roadmap at the bottom for
 what's planned next.
 
 > **Note on naming:** the app's display name (what you see in its window
-> title and About screen) is "Recording by Kyle Smith". The project files,
-> folder, and `.exe` filename still internally say `RecorderByKyleSmith` -
-> that's a code-level identifier, not something you'll normally see while
-> using the app, and leaving it as-is avoids a much larger, riskier rename
-> across every file. Say the word if you'd like that renamed too.
+> title and About screen) is "Simple Record". The project folder, file
+> names, and `.exe` filename are `simple-record-by-mrsmith9`. Inside the
+> C# code itself, things are organized under the name `SimpleRecord`
+> instead - that's because C# code names aren't allowed to contain
+> hyphens, so `simple-record-by-mrsmith9` couldn't be used there directly.
+> You won't normally need to worry about this split; it's mentioned here
+> only so it doesn't look like a mistake if you spot both names while
+> browsing the code.
 
 ## What's built so far
 
@@ -27,8 +30,9 @@ what's planned next.
   No sound is used anywhere - every status change is also shown as text.
 - Asks for confirmation before every recording starts, naming exactly
   what's about to be recorded.
-- Saves recordings to a folder you choose (Videos\Recording by Kyle Smith
-  by default), and lets you pick a fixed recording size (720p up to 8K) -
+- Saves recordings to a folder you choose (Videos\Simple Record
+  by default), lets you pick a fixed recording size (720p up to 8K), and
+  lets you choose your own picture as the main window's background -
   see "Settings" below.
 - An About window with the copyright notice.
 - A custom app icon, shown in the title bar, taskbar, and on the `.exe`
@@ -63,7 +67,7 @@ Click **Settings** (top of the window, next to About) to open:
 
 - **Save recordings to** - shows the current folder, with a **Browse...**
   button that opens a normal Windows folder picker. The default is
-  `Videos\Recording by Kyle Smith`, same as before.
+  `Videos\Simple Record`, same as before.
 - **Recording quality (output size)** - choose the exact pixel size the
   video is saved at:
   - **Automatic (Recommended)** - saves at exactly the size of whatever
@@ -80,16 +84,23 @@ Click **Settings** (top of the window, next to About) to open:
   shape (aspect ratio) of what you're recording doesn't match the chosen
   size - for example a narrow window forced into a wide 16:9 size - black
   bars are added on the sides rather than the picture looking squashed.
+- **Background image** - choose a picture of your own (JPG, PNG, BMP, or
+  GIF) to show behind the main window, with a **Choose Image...** button
+  that opens a normal Windows picture picker, and a **Remove** button to
+  go back to the plain dark background. By default (and if you never set
+  one) the plain dark background is used - there is no forced default
+  picture anymore. Whatever you choose is copied into the app's own
+  settings folder, so it keeps working even if you later move, rename, or
+  delete the original picture file.
 
 Click **Save** to keep your changes (they're remembered for next time you
 open the app) or **Cancel** to discard them. Everything in this window is
 keyboard accessible (Tab between fields, Alt+underlined-letter for a
 shortcut, Enter to Save, Escape to Cancel).
 
-Settings are stored in a small file at
-`%AppData%\Recording by Kyle Smith\settings.json` - you never need to
-open or edit this yourself, but it's there if you're curious or want to
-back it up.
+Settings, including your chosen background image, are stored under
+`%AppData%\Simple Record\` - you never need to open or edit this
+yourself, but it's there if you're curious or want to back it up.
 
 ## 1. Prerequisites
 
@@ -105,10 +116,10 @@ back it up.
 
 1. Open Visual Studio.
 2. **File > Open > Project/Solution**.
-3. Go to your `Documents\Windows app\RecorderByKyleSmith` folder and
-   open `RecorderByKyleSmith.sln`.
+3. Go to your `Documents\Windows app\simple-record-by-mrsmith9` folder and
+   open `simple-record-by-mrsmith9.sln`.
    - If Visual Studio has any trouble with the `.sln` file, you can
-     instead open `src\RecorderByKyleSmith\RecorderByKyleSmith.csproj`
+     instead open `src\simple-record-by-mrsmith9\simple-record-by-mrsmith9.csproj`
      directly the same way - that works just as well.
 4. Visual Studio will restore the NuGet package (`ScreenRecorderLib`)
    automatically. If it doesn't, right-click the solution in
@@ -126,7 +137,7 @@ At the top of Visual Studio, next to the green "Start" button, make sure:
 ## 4. Run it
 
 Press **F5** (or click the green **Start** button). The app should open
-as "Recording by Kyle Smith".
+as "Simple Record".
 
 **Try this to test it:**
 
@@ -140,7 +151,7 @@ as "Recording by Kyle Smith".
    continue.
 5. Press **Alt+T** (or click **Stop Recording**).
 6. After a moment, the status bar at the bottom will show the saved file
-   path. Open your **Videos\Recording by Kyle Smith** folder to find it.
+   path. Open your **Videos\Simple Record** folder to find it.
 
 If Visual Studio shows a build error the first time, that's normal when
 wiring up a new library for the first time - copy the exact error text
@@ -166,7 +177,7 @@ later" below if that ever changes.
    Command Line → Developer PowerShell**).
 2. Make sure you're in the project folder. If not, run:
    ```
-   cd "C:\Users\ksmit\Documents\Windows app\RecorderByKyleSmith\src\RecorderByKyleSmith"
+   cd "C:\Users\ksmit\Documents\Windows app\simple-record-by-mrsmith9\src\simple-record-by-mrsmith9"
    ```
 3. Run:
    ```
@@ -190,7 +201,7 @@ later" below if that ever changes.
 
 4. When it finishes, your shareable build is here:
    ```
-   src\RecorderByKyleSmith\bin\x64\Release\net8.0-windows\win-x64\publish\
+   src\simple-record-by-mrsmith9\bin\x64\Release\net8.0-windows\win-x64\publish\
    ```
    (The extra `x64\` segment appears because the project now always
    builds as x64 instead of "Any CPU" - that's expected.)
@@ -199,7 +210,7 @@ later" below if that ever changes.
    share it: right-click the `publish` folder → **Send to → Compressed
    (zipped) folder**, then send that `.zip`.
 5. To run it: open the `publish` folder (or the unzipped copy on another
-   PC) and double-click `RecorderByKyleSmith.exe`.
+   PC) and double-click `simple-record-by-mrsmith9.exe`.
 
 Expect the file size to be noticeably bigger than before (roughly
 150-200 MB) - that's the bundled .NET runtime, not a mistake.
@@ -237,47 +248,35 @@ version exists, a notice banner appears at the top of the window with a
 it's fully reachable by keyboard (Tab to it, Enter/Space to activate a
 button).
 
-**This needs one setup step from you before it will actually find
-anything**, because it checks a specific GitHub repository that doesn't
-exist yet:
+This is already set up and live, pointed at your real GitHub repository:
+**https://github.com/MrSmith9/RecorderByKyleSmith**. Note that this GitHub
+repository's name (`RecorderByKyleSmith`) was deliberately left as-is during
+this rename - renaming a GitHub repository is a separate, optional step
+from renaming the app or its project files, so it wasn't changed here. If
+you ever do want to rename the actual GitHub repository to match (for
+example to `simple-record-by-mrsmith9`), say so and we'll update
+`src\simple-record-by-mrsmith9\Services\UpdateChecker.cs` to match - GitHub
+also keeps the old URL working as a redirect after a rename, so nothing
+would break either way.
 
-1. If you don't already have one, create a GitHub account
-   (https://github.com) and a new repository for this project - it can be
-   **public or private**, both work fine for this.
-2. Open `src\RecorderByKyleSmith\Services\UpdateChecker.cs` and find these
-   two lines near the top:
-   ```csharp
-   private const string GitHubOwner = "YOUR-GITHUB-USERNAME";
-   private const string GitHubRepo = "YOUR-REPO-NAME";
-   ```
-3. Replace them with your actual GitHub username and repository name. For
-   example, if your repo's web address is
-   `https://github.com/kylesmith/RecorderByKyleSmith`, then:
-   ```csharp
-   private const string GitHubOwner = "kylesmith";
-   private const string GitHubRepo = "RecorderByKyleSmith";
-   ```
-4. Save, rebuild, and the check is live. Until this is filled in, the app
-   simply skips the check every time - nothing breaks either way.
-
-### How to publish a new version (once the repo is set up)
+### How to publish a new version
 
 Each time you want the app to notice a new version is out:
 
-1. Bump the version number in `RecorderByKyleSmith.csproj`, e.g.
-   `<Version>0.4.0</Version>` -> `<Version>0.5.0</Version>`.
+1. Bump the version number in `simple-record-by-mrsmith9.csproj`, e.g.
+   `<Version>0.5.0</Version>` -> `<Version>0.6.0</Version>`.
 2. Publish the new build (see section 5 above) and zip the `publish`
    folder.
 3. On GitHub, go to your repository -> **Releases** -> **Draft a new
    release**.
 4. For the tag, type a **"v" followed by the exact same version number**,
-   e.g. `v0.5.0` - this must match, since that's what the app compares
+   e.g. `v0.6.0` - this must match, since that's what the app compares
    against. Fill in a title/notes if you like.
 5. Attach the zipped `publish` folder to the release as a file, then
    publish it.
 
-The next time the app starts (on any PC running an older version with the
-repo name filled in), it will see `v0.5.0` is newer and show the banner.
+The next time the app starts (on any PC running an older version), it
+will see the new version is newer and show the banner.
 
 ## 3rd-party software and licensing
 
@@ -293,13 +292,13 @@ obligation to publish your own source code.
 ## Project structure
 
 ```
-RecorderByKyleSmith/
-  RecorderByKyleSmith.sln
+simple-record-by-mrsmith9/
+  simple-record-by-mrsmith9.sln
   README.md
   THIRD_PARTY_NOTICES.md
   src/
-    RecorderByKyleSmith/
-      RecorderByKyleSmith.csproj
+    simple-record-by-mrsmith9/
+      simple-record-by-mrsmith9.csproj
       App.xaml / App.xaml.cs            - app startup
       MainWindow.xaml / .xaml.cs        - main screen (buttons, timer, indicator)
       Views/
@@ -323,8 +322,17 @@ RecorderByKyleSmith/
         Styles.xaml                     - colors, fonts, button styles
       Assets/
         AppIcon.ico                     - app icon (title bar/taskbar/.exe)
-        AppBackground.jpg               - MainWindow background image
 ```
+
+Note: there is no longer a bundled background image file. A chosen
+background image is copied into `%AppData%\Simple Record\Background\`
+instead (see "Settings" above), not stored inside the project.
+
+Note: inside the C# code itself (the `namespace` lines at the top of each
+`.cs`/`.xaml` file), everything is organized under `SimpleRecord` rather
+than `simple-record-by-mrsmith9`, because C# doesn't allow hyphens in
+names. This only matters if you're reading the code directly - it doesn't
+affect how the app looks, runs, or is organized on disk.
 
 Everything to do with the recording engine lives in `RecordingService.cs`.
 The window code (`MainWindow.xaml.cs`) only ever calls
@@ -356,3 +364,7 @@ settings) mostly involve editing one file.
    optional and not yet built - see section 5 above).
 8. ~~Part 8: Startup update check (GitHub Releases)~~ - **done** and
    fully live, pointed at your GitHub repo - see section 6 above.
+9. ~~Part 9: Renamed the app to "Simple Record" (display name) and its
+   project files to `simple-record-by-mrsmith9`~~ - **done**.
+10. ~~Part 10: Replaced the forced default background image with a
+    user-chosen one, set from Settings~~ - **done**.

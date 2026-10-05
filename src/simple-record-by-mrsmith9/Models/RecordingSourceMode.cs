@@ -1,4 +1,4 @@
-namespace RecorderByKyleSmith.Models
+namespace SimpleRecord.Models
 {
     /// <summary>What part of the screen a recording should capture.</summary>
     public enum RecordingSourceMode

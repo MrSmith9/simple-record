@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace RecorderByKyleSmith.Views
+namespace SimpleRecord.Views
 {
     /// <summary>
     /// A permission / confirmation step shown every time before a recording

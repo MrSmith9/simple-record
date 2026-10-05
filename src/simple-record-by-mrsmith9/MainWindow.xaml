@@ -1,7 +1,7 @@
-<Window x:Class="RecorderByKyleSmith.MainWindow"
+<Window x:Class="SimpleRecord.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Recording by Kyle Smith"
+        Title="Simple Record"
         Icon="/Assets/AppIcon.ico"
         Width="860" Height="580"
         MinWidth="680" MinHeight="480"
@@ -10,15 +10,20 @@
         FontFamily="Segoe UI">
 
     <Grid>
-        <!-- Background image. Stretch="UniformToFill" crops it to fill the
-             window at any size without distorting it. -->
-        <Image Source="/Assets/AppBackground.jpg" Stretch="UniformToFill"/>
+        <!-- Background image: hidden (Collapsed) unless the user has chosen
+             one in Settings. MainWindow.xaml.cs sets Source and Visibility
+             together in ApplyBackgroundImage() - this starts empty/hidden
+             so the plain BackgroundBrush shows by default, same as every
+             other window in the app. Stretch="UniformToFill" crops it to
+             fill the window at any size without distorting it. -->
+        <Image x:Name="BackgroundImage" Stretch="UniformToFill" Visibility="Collapsed"/>
 
         <!-- A dark, semi-transparent layer on top of the image, so text and
              buttons stay easy to read no matter what's underneath them.
-             Raise the last two alpha digits (currently "B3", ~70% opaque)
-             for more contrast, or lower them to show more of the image. -->
-        <Rectangle Fill="#B3101119"/>
+             Only shown together with BackgroundImage. Raise the last two
+             alpha digits (currently "B3", ~70% opaque) for more contrast,
+             or lower them to show more of the image. -->
+        <Rectangle x:Name="BackgroundScrim" Fill="#B3101119" Visibility="Collapsed"/>
 
     <Grid Margin="32">
         <Grid.RowDefinitions>
@@ -59,7 +64,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Text="Recording by Kyle Smith" Style="{StaticResource HeadingText}"
+            <TextBlock Grid.Column="0" Text="Simple Record" Style="{StaticResource HeadingText}"
                        VerticalAlignment="Center"/>
             <Button Grid.Column="1" x:Name="SettingsButton" Content="S_ettings" Style="{StaticResource SecondaryButton}"
                     Margin="0,0,10,0" Click="SettingsButton_Click"

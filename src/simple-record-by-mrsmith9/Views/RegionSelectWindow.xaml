@@ -1,4 +1,4 @@
-<Window x:Class="RecorderByKyleSmith.Views.RegionSelectWindow"
+<Window x:Class="SimpleRecord.Views.RegionSelectWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Select an area to record"

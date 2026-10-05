@@ -4,7 +4,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace RecorderByKyleSmith.Services
+namespace SimpleRecord.Services
 {
     /// <summary>
     /// A newer version found on GitHub, with enough information to show the
@@ -24,9 +24,11 @@ namespace RecorderByKyleSmith.Services
     /// </summary>
     public static class UpdateChecker
     {
-        // Your GitHub repo: https://github.com/MrSmith9/RecorderByKyleSmith
+        // Your GitHub repo. Must exactly match your actual GitHub
+        // repository's name (https://github.com/MrSmith9/simple-record) -
+        // if you ever rename it again, update this to match.
         private const string GitHubOwner = "MrSmith9";
-        private const string GitHubRepo = "RecorderByKyleSmith";
+        private const string GitHubRepo = "simple-record";
 
         private static readonly HttpClient Http = CreateHttpClient();
 
@@ -39,7 +41,7 @@ namespace RecorderByKyleSmith.Services
                 Timeout = TimeSpan.FromSeconds(6)
             };
             // GitHub's API rejects requests that have no User-Agent header.
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("RecorderByKyleSmith", "1.0"));
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("SimpleRecord", "1.0"));
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
             return client;
         }
@@ -53,12 +55,6 @@ namespace RecorderByKyleSmith.Services
         /// </summary>
         public static async Task<UpdateInfo?> CheckForUpdateAsync(Version currentVersion)
         {
-            if (GitHubOwner == "YOUR-GITHUB-USERNAME" || GitHubRepo == "YOUR-REPO-NAME")
-            {
-                // Not configured yet - skip silently rather than failing.
-                return null;
-            }
-
             try
             {
                 string url = $"https://api.github.com/repos/{GitHubOwner}/{GitHubRepo}/releases/latest";

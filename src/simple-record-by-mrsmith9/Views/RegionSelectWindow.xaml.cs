@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace RecorderByKyleSmith.Views
+namespace SimpleRecord.Views
 {
     /// <summary>
     /// A full-screen, semi-transparent overlay (covering the primary

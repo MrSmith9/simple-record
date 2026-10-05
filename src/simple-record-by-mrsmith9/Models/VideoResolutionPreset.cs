@@ -1,4 +1,4 @@
-namespace RecorderByKyleSmith.Models
+namespace SimpleRecord.Models
 {
     /// <summary>
     /// The size (in pixels) a recording is saved at. "Automatic" means the

@@ -1,6 +1,6 @@
 using System;
 
-namespace RecorderByKyleSmith.Models
+namespace SimpleRecord.Models
 {
     /// <summary>
     /// Describes exactly what the next recording should capture: the whole

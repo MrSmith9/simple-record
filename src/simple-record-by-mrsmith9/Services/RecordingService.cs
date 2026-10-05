@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using RecorderByKyleSmith.Models;
+using SimpleRecord.Models;
 using ScreenRecorderLib;
 
-namespace RecorderByKyleSmith.Services
+namespace SimpleRecord.Services
 {
     /// <summary>
     /// Wraps the ScreenRecorderLib recording engine and exposes a simple

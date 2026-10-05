@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
-using RecorderByKyleSmith.Models;
-using RecorderByKyleSmith.Services;
+using SimpleRecord.Models;
+using SimpleRecord.Services;
 
-namespace RecorderByKyleSmith.Views
+namespace SimpleRecord.Views
 {
     /// <summary>
     /// Lets the user pick one open window to record, from a live list

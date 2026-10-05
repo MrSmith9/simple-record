@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace RecorderByKyleSmith.Views
+namespace SimpleRecord.Views
 {
     public partial class AboutWindow : Window
     {

@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-Recording by Kyle Smith uses the following open-source software.
+Simple Record uses the following open-source software.
 
 ## ScreenRecorderLib
 
@@ -14,7 +14,7 @@ plain terms, it lets you:
 
 - Use the library in a closed-source, commercial, or personal app for free.
 - Keep your own app's source code private - you do NOT have to open-source
-  "Recorder by Kyle Smith" because it uses an MIT-licensed library.
+  "Simple Record" because it uses an MIT-licensed library.
 - Modify the library if you ever need to.
 
 The only real condition is that the license notice below must stay

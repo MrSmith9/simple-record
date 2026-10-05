@@ -1,4 +1,4 @@
-namespace RecorderByKyleSmith.Models
+namespace SimpleRecord.Models
 {
     /// <summary>
     /// The current state of the recorder. The main window uses this to

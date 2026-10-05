@@ -1,16 +1,18 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using RecorderByKyleSmith.Models;
-using RecorderByKyleSmith.Services;
-using RecorderByKyleSmith.Views;
+using SimpleRecord.Models;
+using SimpleRecord.Services;
+using SimpleRecord.Views;
 
-namespace RecorderByKyleSmith
+namespace SimpleRecord
 {
     public partial class MainWindow : Window
     {
@@ -43,7 +45,53 @@ namespace RecorderByKyleSmith
             // opening or get in the way if there's no internet connection.
             Loaded += async (_, _) => await CheckForUpdatesAsync();
 
+            ApplyBackgroundImage();
             UpdateSourceSelectionUi();
+        }
+
+        /// <summary>
+        /// Shows the background image the user chose in Settings (if any)
+        /// behind this window, or hides it so the plain dark background
+        /// shows instead - which is also what happens if no background has
+        /// been chosen, or the saved image can't be loaded for any reason
+        /// (moved, deleted, or corrupted file). This never throws or shows
+        /// an error - a background image is a visual nice-to-have, not
+        /// something the app depends on.
+        /// </summary>
+        private void ApplyBackgroundImage()
+        {
+            string? path = _settings.BackgroundImagePath;
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+            {
+                BackgroundImage.Source = null;
+                BackgroundImage.Visibility = Visibility.Collapsed;
+                BackgroundScrim.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            try
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                // OnLoad reads the whole file into memory immediately and
+                // releases the file handle, instead of keeping it open for
+                // as long as the image is showing - without this, Settings
+                // couldn't replace or delete the stored background file
+                // while the main window is still open and using it.
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.UriSource = new Uri(path, UriKind.Absolute);
+                bitmap.EndInit();
+
+                BackgroundImage.Source = bitmap;
+                BackgroundImage.Visibility = Visibility.Visible;
+                BackgroundScrim.Visibility = Visibility.Visible;
+            }
+            catch
+            {
+                BackgroundImage.Source = null;
+                BackgroundImage.Visibility = Visibility.Collapsed;
+                BackgroundScrim.Visibility = Visibility.Collapsed;
+            }
         }
 
         /// <summary>
@@ -215,6 +263,7 @@ namespace RecorderByKyleSmith
             }
 
             _settings = settingsWindow.ResultSettings;
+            ApplyBackgroundImage();
             bool saved = SettingsService.Save(_settings);
             SetStatus(saved
                 ? "Settings saved."
@@ -257,7 +306,7 @@ namespace RecorderByKyleSmith
                 IndicatorDot.Fill = (Brush)FindResource("TextSecondaryBrush");
                 IndicatorStateText.Text = "Not recording";
                 IndicatorStateText.Foreground = (Brush)FindResource("TextSecondaryBrush");
-                Title = "Recording by Kyle Smith";
+                Title = "Simple Record";
                 StopPulse();
             }
             else if (isPaused)
@@ -265,7 +314,7 @@ namespace RecorderByKyleSmith
                 IndicatorDot.Fill = (Brush)FindResource("AccentBrush");
                 IndicatorStateText.Text = "Paused";
                 IndicatorStateText.Foreground = (Brush)FindResource("AccentBrush");
-                Title = "Paused - Recording by Kyle Smith";
+                Title = "Paused - Simple Record";
                 StopPulse();
             }
             else
@@ -273,9 +322,9 @@ namespace RecorderByKyleSmith
                 IndicatorDot.Fill = (Brush)FindResource("RecordBrush");
                 IndicatorStateText.Text = "Recording";
                 IndicatorStateText.Foreground = (Brush)FindResource("RecordBrush");
-                // "REC" (not "Recording") here so the title bar doesn't read
-                // "Recording - Recording by Kyle Smith".
-                Title = "● REC - Recording by Kyle Smith";
+                // "REC" (short for "recording") keeps the title bar compact
+                // and matches the common red-dot "recording" convention.
+                Title = "● REC - Simple Record";
                 StartPulse();
             }
         }

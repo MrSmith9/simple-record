@@ -1,9 +1,9 @@
-<Window x:Class="RecorderByKyleSmith.Views.SettingsWindow"
+<Window x:Class="SimpleRecord.Views.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Settings - Recording by Kyle Smith"
+        Title="Settings - Simple Record"
         Icon="/Assets/AppIcon.ico"
-        Width="580" Height="620"
+        Width="580" Height="760"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="{StaticResource BackgroundBrush}"
@@ -11,6 +11,10 @@
 
     <Grid Margin="28">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -68,8 +72,39 @@
             </TextBlock>
         </StackPanel>
 
+        <!-- Background image -->
+        <TextBlock Grid.Row="5" Text="Background image:" Style="{StaticResource BodyText}"
+                    FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,20,0,8"/>
+
+        <Grid Grid.Row="6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}" CornerRadius="6"
+                    Padding="10,8" Margin="0,0,10,0">
+                <TextBlock x:Name="BackgroundStatusText" Style="{StaticResource BodyText}"
+                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+            </Border>
+            <Button Grid.Column="1" x:Name="ChooseBackgroundButton" Content="Choose _Image..." Style="{StaticResource SecondaryButton}"
+                    Margin="0,0,10,0" Click="ChooseBackgroundButton_Click"
+                    AutomationProperties.HelpText="Opens a picture picker to choose an image to show behind the main window."/>
+            <Button Grid.Column="2" x:Name="RemoveBackgroundButton" Content="_Remove" Style="{StaticResource SecondaryButton}"
+                    Click="RemoveBackgroundButton_Click"
+                    AutomationProperties.HelpText="Removes the background image and goes back to the plain dark background."/>
+        </Grid>
+
+        <TextBlock Grid.Row="7" Style="{StaticResource BodyText}" FontSize="13" TextWrapping="Wrap"
+                   Opacity="0.85" Margin="0,8,0,0">
+            Shows a picture of your choice behind the main window (not behind this
+            Settings window, or any other window). Accepts JPG, PNG, BMP, or GIF
+            files. Leave this empty to use the plain dark background, same as
+            every other window in the app.
+        </TextBlock>
+
         <!-- Buttons -->
-        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+        <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
             <Button x:Name="SaveButton" Content="_Save" Style="{StaticResource PrimaryButton}"
                     Margin="0,0,10,0" Click="SaveButton_Click" IsDefault="True"/>
             <Button x:Name="CancelButton" Content="_Cancel" Style="{StaticResource SecondaryButton}"

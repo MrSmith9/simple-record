@@ -1,7 +1,7 @@
-<Window x:Class="RecorderByKyleSmith.Views.AboutWindow"
+<Window x:Class="SimpleRecord.Views.AboutWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="About Recording by Kyle Smith"
+        Title="About Simple Record"
         Icon="/Assets/AppIcon.ico"
         Width="460" Height="380"
         WindowStartupLocation="CenterOwner"
@@ -17,8 +17,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Recording by Kyle Smith" Style="{StaticResource HeadingText}"/>
-        <TextBlock Grid.Row="1" Text="Version 0.4.0 - core recording + source selection + update checking + settings"
+        <TextBlock Grid.Row="0" Text="Simple Record" Style="{StaticResource HeadingText}"/>
+        <TextBlock Grid.Row="1" Text="Version 0.6.0 - core recording + source selection + update checking + settings"
                    Style="{StaticResource BodyText}" Margin="0,4,0,16"/>
 
         <StackPanel Grid.Row="2">

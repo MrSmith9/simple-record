@@ -1,6 +1,6 @@
 using System;
 
-namespace RecorderByKyleSmith.Models
+namespace SimpleRecord.Models
 {
     /// <summary>
     /// A lightweight, app-level stand-in for a recordable window, so that

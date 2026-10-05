@@ -2,9 +2,10 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
-using RecorderByKyleSmith.Models;
+using SimpleRecord.Models;
+using SimpleRecord.Services;
 
-namespace RecorderByKyleSmith.Views
+namespace SimpleRecord.Views
 {
     public partial class SettingsWindow : Window
     {
@@ -17,6 +18,7 @@ namespace RecorderByKyleSmith.Views
         public AppSettings ResultSettings { get; private set; }
 
         private string _selectedOutputFolder;
+        private string? _selectedBackgroundPath;
 
         public SettingsWindow(AppSettings currentSettings)
         {
@@ -27,6 +29,9 @@ namespace RecorderByKyleSmith.Views
             OutputFolderText.Text = _selectedOutputFolder;
 
             RadioButtonFor(currentSettings.Resolution).IsChecked = true;
+
+            _selectedBackgroundPath = currentSettings.BackgroundImagePath;
+            UpdateBackgroundDisplay();
         }
 
         private RadioButton RadioButtonFor(VideoResolutionPreset preset) => preset switch
@@ -66,12 +71,60 @@ namespace RecorderByKyleSmith.Views
             }
         }
 
+        /// <summary>
+        /// Opens a picture picker and, if the user chooses a file, copies it
+        /// into the app's own AppData folder (via
+        /// <see cref="SettingsService.SaveBackgroundImage"/>) so it keeps
+        /// working even if the original file is later moved or deleted.
+        /// </summary>
+        private void ChooseBackgroundButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "Choose a background image",
+                Filter = "Image files (*.jpg;*.jpeg;*.png;*.bmp;*.gif)|*.jpg;*.jpeg;*.png;*.bmp;*.gif|All files (*.*)|*.*"
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            string? storedPath = SettingsService.SaveBackgroundImage(dialog.FileName);
+            if (storedPath == null)
+            {
+                MessageBox.Show(this,
+                    "That picture couldn't be copied into the app's settings folder, so it wasn't set as the background. Your previous background (if any) is unchanged.",
+                    "Couldn't set background", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            _selectedBackgroundPath = storedPath;
+            UpdateBackgroundDisplay();
+        }
+
+        private void RemoveBackgroundButton_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsService.DeleteBackgroundImage();
+            _selectedBackgroundPath = null;
+            UpdateBackgroundDisplay();
+        }
+
+        private void UpdateBackgroundDisplay()
+        {
+            BackgroundStatusText.Text = _selectedBackgroundPath == null
+                ? "No custom background (using the plain dark background)"
+                : Path.GetFileName(_selectedBackgroundPath);
+            RemoveBackgroundButton.IsEnabled = _selectedBackgroundPath != null;
+        }
+
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             ResultSettings = new AppSettings
             {
                 OutputFolder = _selectedOutputFolder,
-                Resolution = SelectedResolution()
+                Resolution = SelectedResolution(),
+                BackgroundImagePath = _selectedBackgroundPath
             };
             DialogResult = true;
         }
