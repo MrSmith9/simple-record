@@ -22,7 +22,12 @@
     <Product>Recording by Kyle Smith</Product>
     <Company>Kyle Smith</Company>
     <Copyright>© 2026 Kyle Smith. All rights reserved.</Copyright>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
+
+    <!-- This is what gives the built .exe its icon - shown in File
+         Explorer, and in the taskbar/Alt+Tab when SmartScreen/shell
+         caching uses the file icon directly. -->
+    <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,6 +39,12 @@
     <!-- Embedded into the app itself, so the background always loads no
          matter where the .exe is run from. -->
     <Resource Include="Assets\AppBackground.jpg" />
+
+    <!-- Same icon file as <ApplicationIcon> above, but also included here
+         as a Resource so the running app's windows (title bar, taskbar)
+         can load it directly - <ApplicationIcon> alone only covers the
+         .exe file's own icon, not what WPF shows while the app is open. -->
+    <Resource Include="Assets\AppIcon.ico" />
   </ItemGroup>
 
 </Project>

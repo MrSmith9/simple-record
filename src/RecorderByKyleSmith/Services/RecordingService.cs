@@ -55,11 +55,13 @@ namespace RecorderByKyleSmith.Services
         /// <summary>
         /// Starts recording to an MP4 file inside the given folder, using
         /// whatever source (whole screen / window / custom area) is
-        /// described by <paramref name="source"/>. The file name is
-        /// generated automatically from the current date and time, so
-        /// recordings never overwrite each other.
+        /// described by <paramref name="source"/>, saved at the given
+        /// output size (or the source's own size, if <paramref
+        /// name="resolution"/> is Automatic). The file name is generated
+        /// automatically from the current date and time, so recordings
+        /// never overwrite each other.
         /// </summary>
-        public void Start(string outputFolder, RecordingSourceSelection source)
+        public void Start(string outputFolder, RecordingSourceSelection source, VideoResolutionPreset resolution)
         {
             if (State != RecordingState.Idle)
             {
@@ -79,16 +81,30 @@ namespace RecorderByKyleSmith.Services
             string fileName = $"Recording_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.mp4";
             CurrentFilePath = Path.Combine(outputFolder, fileName);
 
+            var outputOptions = new OutputOptions
+            {
+                RecorderMode = RecorderMode.Video
+            };
+
+            // Automatic (PixelSize() returns null) leaves OutputFrameSize
+            // unset, which tells ScreenRecorderLib to just use whatever
+            // size is actually being recorded. For a fixed size, Stretch
+            // defaults to Uniform, which keeps the real picture's shape
+            // intact and adds black bars rather than distorting it, if the
+            // chosen size doesn't match the shape of the source.
+            (int Width, int Height)? fixedSize = resolution.PixelSize();
+            if (fixedSize != null)
+            {
+                outputOptions.OutputFrameSize = new ScreenSize(fixedSize.Value.Width, fixedSize.Value.Height);
+            }
+
             var options = new RecorderOptions
             {
                 SourceOptions = new SourceOptions
                 {
                     RecordingSources = BuildRecordingSources(source)
                 },
-                OutputOptions = new OutputOptions
-                {
-                    RecorderMode = RecorderMode.Video
-                },
+                OutputOptions = outputOptions,
                 AudioOptions = new AudioOptions
                 {
                     // Audio is switched on in a later part, once we add the

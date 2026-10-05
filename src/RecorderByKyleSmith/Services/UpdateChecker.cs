@@ -24,13 +24,7 @@ namespace RecorderByKyleSmith.Services
     /// </summary>
     public static class UpdateChecker
     {
-        // TODO (Kyle): fill these in with your GitHub username and the name
-        // of the repository you publish releases to, and this feature is
-        // fully wired up. For example, if your repo is at
-        // https://github.com/kylesmith/RecorderByKyleSmith then:
-        //   GitHubOwner = "kylesmith"
-        //   GitHubRepo  = "RecorderByKyleSmith"
-        // Until these are filled in, the check is skipped silently.
+        // Your GitHub repo: https://github.com/MrSmith9/RecorderByKyleSmith
         private const string GitHubOwner = "MrSmith9";
         private const string GitHubRepo = "RecorderByKyleSmith";
 

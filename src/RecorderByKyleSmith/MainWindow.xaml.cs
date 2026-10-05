@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
@@ -23,10 +22,9 @@ namespace RecorderByKyleSmith
         private RecordingSourceSelection _sourceSelection = RecordingSourceSelection.FullScreen();
         private UpdateInfo? _pendingUpdate;
 
-        // Recordings are saved here for now. Choosing your own folder is
-        // added in a later part.
-        private static readonly string DefaultOutputFolder =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), "Recording by Kyle Smith");
+        // Where to save, and what size to record at - loaded once at
+        // startup, and updated/saved whenever the Settings window is used.
+        private AppSettings _settings = SettingsService.Load();
 
         public MainWindow()
         {
@@ -162,7 +160,7 @@ namespace RecorderByKyleSmith
                 return;
             }
 
-            _recordingService.Start(DefaultOutputFolder, _sourceSelection);
+            _recordingService.Start(_settings.OutputFolder, _sourceSelection, _settings.Resolution);
 
             if (_recordingService.State == RecordingState.Recording)
             {
@@ -205,6 +203,22 @@ namespace RecorderByKyleSmith
         {
             var about = new AboutWindow { Owner = this };
             about.ShowDialog();
+        }
+
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var settingsWindow = new SettingsWindow(_settings) { Owner = this };
+            bool? result = settingsWindow.ShowDialog();
+            if (result != true)
+            {
+                return;
+            }
+
+            _settings = settingsWindow.ResultSettings;
+            bool saved = SettingsService.Save(_settings);
+            SetStatus(saved
+                ? "Settings saved."
+                : "Settings are being used for now, but couldn't be saved to disk - they may reset next time you open the app.");
         }
 
         private void OnRecordingCompleted(string filePath)

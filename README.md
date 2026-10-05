@@ -4,8 +4,10 @@ A Windows desktop screen recorder, built step by step in Visual Studio using
 C# and WPF (.NET 8).
 
 This README covers everything built so far: the core recording engine
-(Part 1), recording-source selection (Part 4), and a startup update check
-(Part 8). See the full roadmap at the bottom for what's planned next.
+(Part 1), recording-source selection (Part 4), settings for save location
+and recording quality (Part 2), an app icon (part of Part 6), and a
+startup update check (Part 8). See the full roadmap at the bottom for
+what's planned next.
 
 > **Note on naming:** the app's display name (what you see in its window
 > title and About screen) is "Recording by Kyle Smith". The project files,
@@ -25,17 +27,19 @@ This README covers everything built so far: the core recording engine
   No sound is used anywhere - every status change is also shown as text.
 - Asks for confirmation before every recording starts, naming exactly
   what's about to be recorded.
-- Saves recordings automatically to your Videos\Recording by Kyle Smith folder.
+- Saves recordings to a folder you choose (Videos\Recording by Kyle Smith
+  by default), and lets you pick a fixed recording size (720p up to 8K) -
+  see "Settings" below.
 - An About window with the copyright notice.
+- A custom app icon, shown in the title bar, taskbar, and on the `.exe`
+  file itself.
 - A way to publish a shareable `.exe` (see section 5 below).
 - A startup check for newer versions, shown as a visual banner with a
-  download link - see "Checking for updates" below. **Needs one more step
-  from you to fully turn on** (your GitHub repo name).
+  download link - see "Checking for updates" below.
 
 Not yet included (coming in later parts - see the roadmap below):
-choosing the save folder, file format/quality options, system/microphone
-audio, global keyboard shortcuts, a custom app icon, and a polished
-installer.
+file format options beyond MP4, system/microphone audio, global keyboard
+shortcuts, further theme polish, and a polished installer.
 
 ## Choosing what to record
 
@@ -52,6 +56,40 @@ start recording (they're locked while a recording is in progress):
 
 The currently selected button is highlighted, and the line underneath
 always says exactly what will be recorded.
+
+## Settings
+
+Click **Settings** (top of the window, next to About) to open:
+
+- **Save recordings to** - shows the current folder, with a **Browse...**
+  button that opens a normal Windows folder picker. The default is
+  `Videos\Recording by Kyle Smith`, same as before.
+- **Recording quality (output size)** - choose the exact pixel size the
+  video is saved at:
+  - **Automatic (Recommended)** - saves at exactly the size of whatever
+    you're recording (your screen's real resolution, the window's real
+    size, or the area you dragged out). This is what the app always did
+    before this setting existed.
+  - **720p HD** (1280 x 720), **1080p Full HD** (1920 x 1080), **2K /
+    1440p** (2560 x 1440), **4K UHD** (3840 x 2160), **8K UHD** (7680 x
+    4320) - forces the saved video to exactly that size.
+
+  Two things worth knowing: choosing a size **bigger** than what you're
+  actually recording does not add real detail - a 1080p screen "recorded"
+  at 4K just gets stretched up, it doesn't become sharper. And if the
+  shape (aspect ratio) of what you're recording doesn't match the chosen
+  size - for example a narrow window forced into a wide 16:9 size - black
+  bars are added on the sides rather than the picture looking squashed.
+
+Click **Save** to keep your changes (they're remembered for next time you
+open the app) or **Cancel** to discard them. Everything in this window is
+keyboard accessible (Tab between fields, Alt+underlined-letter for a
+shortcut, Enter to Save, Escape to Cancel).
+
+Settings are stored in a small file at
+`%AppData%\Recording by Kyle Smith\settings.json` - you never need to
+open or edit this yourself, but it's there if you're curious or want to
+back it up.
 
 ## 1. Prerequisites
 
@@ -227,19 +265,19 @@ exist yet:
 Each time you want the app to notice a new version is out:
 
 1. Bump the version number in `RecorderByKyleSmith.csproj`, e.g.
-   `<Version>0.3.0</Version>` -> `<Version>0.4.0</Version>`.
+   `<Version>0.4.0</Version>` -> `<Version>0.5.0</Version>`.
 2. Publish the new build (see section 5 above) and zip the `publish`
    folder.
 3. On GitHub, go to your repository -> **Releases** -> **Draft a new
    release**.
 4. For the tag, type a **"v" followed by the exact same version number**,
-   e.g. `v0.4.0` - this must match, since that's what the app compares
+   e.g. `v0.5.0` - this must match, since that's what the app compares
    against. Fill in a title/notes if you like.
 5. Attach the zipped `publish` folder to the release as a file, then
    publish it.
 
 The next time the app starts (on any PC running an older version with the
-repo name filled in), it will see `v0.4.0` is newer and show the banner.
+repo name filled in), it will see `v0.5.0` is newer and show the banner.
 
 ## 3rd-party software and licensing
 
@@ -269,16 +307,23 @@ RecorderByKyleSmith/
         AboutWindow.xaml(.cs)           - About + copyright
         WindowSelectDialog.xaml(.cs)    - "choose a window" list
         RegionSelectWindow.xaml(.cs)    - "drag out a custom area" overlay
+        SettingsWindow.xaml(.cs)        - save location + recording quality
       Services/
         RecordingService.cs             - wraps the recording engine
         UpdateChecker.cs                - checks GitHub Releases for a newer version
+        SettingsService.cs              - loads/saves settings.json in %AppData%
       Models/
         RecordingState.cs               - Idle / Recording / Paused
         RecordingSourceMode.cs          - FullScreen / Window / Region
         RecordingSourceSelection.cs     - the current "what to record" choice
         WindowInfo.cs                   - a simple, app-level window reference
+        AppSettings.cs                  - save folder + recording quality choice
+        VideoResolutionPreset.cs        - Automatic / 720p / 1080p / 2K / 4K / 8K
       Resources/
         Styles.xaml                     - colors, fonts, button styles
+      Assets/
+        AppIcon.ico                     - app icon (title bar/taskbar/.exe)
+        AppBackground.jpg               - MainWindow background image
 ```
 
 Everything to do with the recording engine lives in `RecordingService.cs`.
@@ -292,8 +337,9 @@ settings) mostly involve editing one file.
 
 1. ~~Part 1: Core recording engine (whole screen, start/pause/resume/stop,
    indicator, timer, permission step)~~ - **done**
-2. **Part 2**: Settings - choose the save folder, file format, and
-   quality/bitrate, and remember your choice between app runs.
+2. ~~Part 2: Settings - choose the save folder and recording quality
+   (720p-8K), remembered between runs.~~ - **done**. File format
+   (currently always MP4/H.264) is not yet a choice.
 3. **Part 3**: Audio - toggle system audio and microphone on/off, pick
    which microphone to use.
 4. ~~Part 4: Choose what to record - a specific open window, or a
@@ -302,10 +348,11 @@ settings) mostly involve editing one file.
 5. **Part 5**: Global keyboard shortcuts (start/stop from outside the
    app window) and a small always-on-top recording indicator so it's
    obvious recording is active even if the main window is minimized.
-6. **Part 6**: Visual polish - custom app icon, refined theme.
+6. **Part 6 (partial)**: Visual polish. ~~Custom app icon~~ - **done**.
+   Theme refinement and a possible high-contrast/light-dark toggle are
+   still open.
 7. ~~Part 7: Packaging - a shareable `.exe` via `dotnet publish`~~ -
    **done** (a polished installer with Start Menu/uninstaller is still
    optional and not yet built - see section 5 above).
-8. ~~Part 8: Startup update check (GitHub Releases)~~ - **done**, but
-   needs your GitHub username/repo name filled in before it's fully live -
-   see section 6 above.
+8. ~~Part 8: Startup update check (GitHub Releases)~~ - **done** and
+   fully live, pointed at your GitHub repo - see section 6 above.
