@@ -31,18 +31,22 @@ what's planned next.
 - Asks for confirmation before every recording starts, naming exactly
   what's about to be recorded.
 - Saves recordings to a folder you choose (Videos\Simple Record
-  by default), lets you pick a fixed recording size (720p up to 8K), and
-  lets you choose your own picture as the main window's background -
-  see "Settings" below.
+  by default), lets you pick a fixed recording size (720p up to 8K), lets
+  you choose your own picture as the main window's background, and lets
+  you turn microphone audio on or off - see "Settings" below.
 - An About window with the copyright notice.
 - A custom app icon, shown in the title bar, taskbar, and on the `.exe`
   file itself.
 - A way to publish a shareable `.exe` (see section 5 below).
 - A startup check for newer versions, shown as a visual banner with a
   download link - see "Checking for updates" below.
+- When recording a **Custom Area**, a thin red border now stays on screen
+  the whole time, drawn exactly around the area being recorded, so it's
+  always obvious which part of your screen is captured - see "Choosing
+  what to record" below.
 
 Not yet included (coming in later parts - see the roadmap below):
-file format options beyond MP4, system/microphone audio, global keyboard
+system/speaker audio, file format options beyond MP4, global keyboard
 shortcuts, further theme polish, and a polished installer.
 
 ## Choosing what to record
@@ -60,6 +64,18 @@ start recording (they're locked while a recording is in progress):
 
 The currently selected button is highlighted, and the line underneath
 always says exactly what will be recorded.
+
+**While a Custom Area recording is running**, a thin red line stays drawn
+around that exact area for as long as the recording lasts (including while
+paused), so you always know what's inside the frame. You can still click
+and type normally through it - it doesn't block your mouse or keyboard in
+any way - and it never shows up in the saved video itself, only on your
+own screen while you're recording. (Behind the scenes, this uses a Windows
+feature called `SetWindowDisplayAffinity`, the same one apps like password
+managers use to hide a window from screen shares - it needs Windows 10
+version 2004/May 2020 Update or newer, which almost every PC has by now;
+on a much older Windows 10, the red line would end up in the recording
+too, which isn't dangerous, just not ideal.)
 
 ## Settings
 
@@ -92,6 +108,14 @@ Click **Settings** (top of the window, next to About) to open:
   picture anymore. Whatever you choose is copied into the app's own
   settings folder, so it keeps working even if you later move, rename, or
   delete the original picture file.
+- **Microphone audio** - a checkbox to turn your microphone on or off for
+  the next recording. Off (unchecked) by default, meaning the saved video
+  has no sound at all, same as before this setting existed. When checked,
+  your **default** microphone (whichever one is set as default in
+  Windows) is recorded into the video's sound track - there's no picker
+  yet to choose a specific microphone if you have more than one. System/
+  speaker audio (recording sounds the PC itself is playing) isn't
+  available yet - only the microphone.
 
 Click **Save** to keep your changes (they're remembered for next time you
 open the app) or **Cancel** to discard them. Everything in this window is
@@ -249,15 +273,11 @@ it's fully reachable by keyboard (Tab to it, Enter/Space to activate a
 button).
 
 This is already set up and live, pointed at your real GitHub repository:
-**https://github.com/MrSmith9/RecorderByKyleSmith**. Note that this GitHub
-repository's name (`RecorderByKyleSmith`) was deliberately left as-is during
-this rename - renaming a GitHub repository is a separate, optional step
-from renaming the app or its project files, so it wasn't changed here. If
-you ever do want to rename the actual GitHub repository to match (for
-example to `simple-record-by-mrsmith9`), say so and we'll update
+**https://github.com/MrSmith9/simple-record**. If you ever rename the
+GitHub repository again, just say so and we'll update
 `src\simple-record-by-mrsmith9\Services\UpdateChecker.cs` to match - GitHub
 also keeps the old URL working as a redirect after a rename, so nothing
-would break either way.
+breaks in the meantime either way.
 
 ### How to publish a new version
 
@@ -306,7 +326,8 @@ simple-record-by-mrsmith9/
         AboutWindow.xaml(.cs)           - About + copyright
         WindowSelectDialog.xaml(.cs)    - "choose a window" list
         RegionSelectWindow.xaml(.cs)    - "drag out a custom area" overlay
-        SettingsWindow.xaml(.cs)        - save location + recording quality
+        RegionBoundaryOverlay.xaml(.cs) - red border shown during a Custom Area recording
+        SettingsWindow.xaml(.cs)        - save location, quality, background, microphone
       Services/
         RecordingService.cs             - wraps the recording engine
         UpdateChecker.cs                - checks GitHub Releases for a newer version
@@ -316,7 +337,7 @@ simple-record-by-mrsmith9/
         RecordingSourceMode.cs          - FullScreen / Window / Region
         RecordingSourceSelection.cs     - the current "what to record" choice
         WindowInfo.cs                   - a simple, app-level window reference
-        AppSettings.cs                  - save folder + recording quality choice
+        AppSettings.cs                  - save folder, quality, background, microphone choices
         VideoResolutionPreset.cs        - Automatic / 720p / 1080p / 2K / 4K / 8K
       Resources/
         Styles.xaml                     - colors, fonts, button styles
@@ -348,8 +369,9 @@ settings) mostly involve editing one file.
 2. ~~Part 2: Settings - choose the save folder and recording quality
    (720p-8K), remembered between runs.~~ - **done**. File format
    (currently always MP4/H.264) is not yet a choice.
-3. **Part 3**: Audio - toggle system audio and microphone on/off, pick
-   which microphone to use.
+3. **Part 3 (partial)**: Audio. ~~Microphone on/off~~ - **done**, see
+   "Settings" above. System/speaker audio, and picking a specific
+   microphone when you have more than one, are still open.
 4. ~~Part 4: Choose what to record - a specific open window, or a
    custom rectangular area, not just the whole screen.~~ - **done**
    (primary monitor only for window/area selection, for now)
@@ -368,3 +390,5 @@ settings) mostly involve editing one file.
    project files to `simple-record-by-mrsmith9`~~ - **done**.
 10. ~~Part 10: Replaced the forced default background image with a
     user-chosen one, set from Settings~~ - **done**.
+11. ~~Part 11: Microphone on/off toggle (part of Part 3), and a visible
+    red border around Custom Area recordings while they run~~ - **done**.

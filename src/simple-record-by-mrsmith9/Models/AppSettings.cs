@@ -28,6 +28,13 @@ namespace SimpleRecord.Models
         /// </summary>
         public string? BackgroundImagePath { get; set; }
 
+        /// <summary>
+        /// Whether to record audio from the microphone. Off by default,
+        /// since adding sound to a recording that previously had none
+        /// shouldn't happen without the user choosing it.
+        /// </summary>
+        public bool MicrophoneEnabled { get; set; } = false;
+
         /// <summary>Used the very first time the app runs, before any settings have been saved.</summary>
         public static readonly string DefaultOutputFolder =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), "Simple Record");

@@ -23,6 +23,7 @@ namespace SimpleRecord
         private TimeSpan _pausedElapsed = TimeSpan.Zero;
         private RecordingSourceSelection _sourceSelection = RecordingSourceSelection.FullScreen();
         private UpdateInfo? _pendingUpdate;
+        private RegionBoundaryOverlay? _regionBoundaryOverlay;
 
         // Where to save, and what size to record at - loaded once at
         // startup, and updated/saved whenever the Settings window is used.
@@ -47,6 +48,11 @@ namespace SimpleRecord
 
             ApplyBackgroundImage();
             UpdateSourceSelectionUi();
+
+            // Safety net: if the app is closed while a Custom Area
+            // recording is still running, make sure the red border doesn't
+            // get left behind as an orphaned window on the desktop.
+            Closing += (_, _) => CloseRegionBoundaryOverlay();
         }
 
         /// <summary>
@@ -208,7 +214,7 @@ namespace SimpleRecord
                 return;
             }
 
-            _recordingService.Start(_settings.OutputFolder, _sourceSelection, _settings.Resolution);
+            _recordingService.Start(_settings.OutputFolder, _sourceSelection, _settings.Resolution, _settings.MicrophoneEnabled);
 
             if (_recordingService.State == RecordingState.Recording)
             {
@@ -217,7 +223,34 @@ namespace SimpleRecord
                 _elapsedTimer.Start();
                 UpdateTimerDisplay();
                 SetRecordingUiState(isRecording: true, isPaused: false);
+                ShowRegionBoundaryIfNeeded();
             }
+        }
+
+        /// <summary>
+        /// Shows a thin red click-through border around the exact area
+        /// being recorded, but only for Custom Area recordings - Whole
+        /// Screen and Window recordings don't need it, since their
+        /// boundary (the whole monitor, or the window's own edges) is
+        /// already obvious without any extra help.
+        /// </summary>
+        private void ShowRegionBoundaryIfNeeded()
+        {
+            if (_sourceSelection.Mode != RecordingSourceMode.Region)
+            {
+                return;
+            }
+
+            _regionBoundaryOverlay = new RegionBoundaryOverlay(
+                _sourceSelection.RegionX, _sourceSelection.RegionY,
+                _sourceSelection.RegionWidth, _sourceSelection.RegionHeight);
+            _regionBoundaryOverlay.Show();
+        }
+
+        private void CloseRegionBoundaryOverlay()
+        {
+            _regionBoundaryOverlay?.Close();
+            _regionBoundaryOverlay = null;
         }
 
         private void PauseButton_Click(object sender, RoutedEventArgs e)
@@ -272,6 +305,7 @@ namespace SimpleRecord
 
         private void OnRecordingCompleted(string filePath)
         {
+            CloseRegionBoundaryOverlay();
             SetRecordingUiState(isRecording: false, isPaused: false);
             SetStatus($"Recording saved: {filePath}");
         }
@@ -279,6 +313,7 @@ namespace SimpleRecord
         private void OnRecordingFailed(string error)
         {
             _elapsedTimer.Stop();
+            CloseRegionBoundaryOverlay();
             SetRecordingUiState(isRecording: false, isPaused: false);
             SetStatus($"Something went wrong: {error}");
         }

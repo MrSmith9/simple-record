@@ -3,108 +3,125 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Settings - Simple Record"
         Icon="/Assets/AppIcon.ico"
-        Width="580" Height="760"
+        Width="580" Height="640"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="{StaticResource BackgroundBrush}"
         FontFamily="Segoe UI">
 
-    <Grid Margin="28">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Settings" Style="{StaticResource HeadingText}" Margin="0,0,0,20"/>
+        <!-- Everything above the Save/Cancel buttons scrolls, so the window
+             can stay a fixed, reasonable size no matter how many settings
+             get added later - the mouse wheel, the scrollbar, and the Up/
+             Down/Page Up/Page Down keys (once this area has focus) all
+             work here, since this is WPF's normal built-in ScrollViewer
+             behavior, not anything custom. -->
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="28,28,20,0">
+            <StackPanel>
+                <TextBlock Text="Settings" Style="{StaticResource HeadingText}" Margin="0,0,0,20"/>
 
-        <!-- Save location -->
-        <TextBlock Grid.Row="1" Text="Save recordings to:" Style="{StaticResource BodyText}"
-                    FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
+                <!-- Save location -->
+                <TextBlock Text="Save recordings to:" Style="{StaticResource BodyText}"
+                            FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
 
-        <Grid Grid.Row="2" Margin="0,0,0,24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}" CornerRadius="6"
-                    Padding="10,8" Margin="0,0,10,0">
-                <TextBlock x:Name="OutputFolderText" Style="{StaticResource BodyText}"
-                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-            </Border>
-            <Button Grid.Column="1" x:Name="BrowseButton" Content="_Browse..." Style="{StaticResource SecondaryButton}"
-                    Click="BrowseButton_Click"
-                    AutomationProperties.HelpText="Opens a folder picker to choose where recordings are saved."/>
-        </Grid>
+                <Grid Margin="0,0,0,24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}" CornerRadius="6"
+                            Padding="10,8" Margin="0,0,10,0">
+                        <TextBlock x:Name="OutputFolderText" Style="{StaticResource BodyText}"
+                                   TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                    </Border>
+                    <Button Grid.Column="1" x:Name="BrowseButton" Content="_Browse..." Style="{StaticResource SecondaryButton}"
+                            Click="BrowseButton_Click"
+                            AutomationProperties.HelpText="Opens a folder picker to choose where recordings are saved."/>
+                </Grid>
 
-        <!-- Recording quality -->
-        <TextBlock Grid.Row="3" Text="Recording quality (output size):" Style="{StaticResource BodyText}"
-                    FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
+                <!-- Recording quality -->
+                <TextBlock Text="Recording quality (output size):" Style="{StaticResource BodyText}"
+                            FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
 
-        <StackPanel Grid.Row="4">
-            <RadioButton x:Name="AutomaticRadio" GroupName="Resolution"
-                         Content="_Automatic (matches what you're recording) - Recommended"
-                         Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
-            <RadioButton x:Name="R720Radio" GroupName="Resolution" Content="_720p HD (1280 x 720)"
-                         Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
-            <RadioButton x:Name="R1080Radio" GroupName="Resolution" Content="1_080p Full HD (1920 x 1080)"
-                         Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
-            <RadioButton x:Name="R1440Radio" GroupName="Resolution" Content="_2K / 1440p (2560 x 1440)"
-                         Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
-            <RadioButton x:Name="R2160Radio" GroupName="Resolution" Content="_4K UHD (3840 x 2160)"
-                         Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
-            <RadioButton x:Name="R4320Radio" GroupName="Resolution" Content="_8K UHD (7680 x 4320)"
-                         Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,14"/>
+                <StackPanel Margin="0,0,0,24">
+                    <RadioButton x:Name="AutomaticRadio" GroupName="Resolution"
+                                 Content="_Automatic (matches what you're recording) - Recommended"
+                                 Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
+                    <RadioButton x:Name="R720Radio" GroupName="Resolution" Content="_720p HD (1280 x 720)"
+                                 Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
+                    <RadioButton x:Name="R1080Radio" GroupName="Resolution" Content="1_080p Full HD (1920 x 1080)"
+                                 Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
+                    <RadioButton x:Name="R1440Radio" GroupName="Resolution" Content="_2K / 1440p (2560 x 1440)"
+                                 Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
+                    <RadioButton x:Name="R2160Radio" GroupName="Resolution" Content="_4K UHD (3840 x 2160)"
+                                 Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
+                    <RadioButton x:Name="R4320Radio" GroupName="Resolution" Content="_8K UHD (7680 x 4320)"
+                                 Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,14"/>
 
-            <TextBlock Style="{StaticResource BodyText}" FontSize="13" TextWrapping="Wrap" Opacity="0.85">
-                Choosing a size bigger than what you're actually recording does not add
-                real detail - it just stretches the picture to fill that size. If the
-                shape doesn't match (for example recording a narrow window at a wide
-                resolution), black bars are added rather than the image looking stretched
-                or squashed. "Automatic" is recommended for most people.
-            </TextBlock>
-        </StackPanel>
+                    <TextBlock Style="{StaticResource BodyText}" FontSize="13" TextWrapping="Wrap" Opacity="0.85">
+                        Choosing a size bigger than what you're actually recording does not add
+                        real detail - it just stretches the picture to fill that size. If the
+                        shape doesn't match (for example recording a narrow window at a wide
+                        resolution), black bars are added rather than the image looking stretched
+                        or squashed. "Automatic" is recommended for most people.
+                    </TextBlock>
+                </StackPanel>
 
-        <!-- Background image -->
-        <TextBlock Grid.Row="5" Text="Background image:" Style="{StaticResource BodyText}"
-                    FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,20,0,8"/>
+                <!-- Background image -->
+                <TextBlock Text="Background image:" Style="{StaticResource BodyText}"
+                            FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
 
-        <Grid Grid.Row="6">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}" CornerRadius="6"
-                    Padding="10,8" Margin="0,0,10,0">
-                <TextBlock x:Name="BackgroundStatusText" Style="{StaticResource BodyText}"
-                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-            </Border>
-            <Button Grid.Column="1" x:Name="ChooseBackgroundButton" Content="Choose _Image..." Style="{StaticResource SecondaryButton}"
-                    Margin="0,0,10,0" Click="ChooseBackgroundButton_Click"
-                    AutomationProperties.HelpText="Opens a picture picker to choose an image to show behind the main window."/>
-            <Button Grid.Column="2" x:Name="RemoveBackgroundButton" Content="_Remove" Style="{StaticResource SecondaryButton}"
-                    Click="RemoveBackgroundButton_Click"
-                    AutomationProperties.HelpText="Removes the background image and goes back to the plain dark background."/>
-        </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}" CornerRadius="6"
+                            Padding="10,8" Margin="0,0,10,0">
+                        <TextBlock x:Name="BackgroundStatusText" Style="{StaticResource BodyText}"
+                                   TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                    </Border>
+                    <Button Grid.Column="1" x:Name="ChooseBackgroundButton" Content="Choose _Image..." Style="{StaticResource SecondaryButton}"
+                            Margin="0,0,10,0" Click="ChooseBackgroundButton_Click"
+                            AutomationProperties.HelpText="Opens a picture picker to choose an image to show behind the main window."/>
+                    <Button Grid.Column="2" x:Name="RemoveBackgroundButton" Content="_Remove" Style="{StaticResource SecondaryButton}"
+                            Click="RemoveBackgroundButton_Click"
+                            AutomationProperties.HelpText="Removes the background image and goes back to the plain dark background."/>
+                </Grid>
 
-        <TextBlock Grid.Row="7" Style="{StaticResource BodyText}" FontSize="13" TextWrapping="Wrap"
-                   Opacity="0.85" Margin="0,8,0,0">
-            Shows a picture of your choice behind the main window (not behind this
-            Settings window, or any other window). Accepts JPG, PNG, BMP, or GIF
-            files. Leave this empty to use the plain dark background, same as
-            every other window in the app.
-        </TextBlock>
+                <TextBlock Style="{StaticResource BodyText}" FontSize="13" TextWrapping="Wrap"
+                           Opacity="0.85" Margin="0,8,0,0">
+                    Shows a picture of your choice behind the main window (not behind this
+                    Settings window, or any other window). Accepts JPG, PNG, BMP, or GIF
+                    files. Leave this empty to use the plain dark background, same as
+                    every other window in the app.
+                </TextBlock>
 
-        <!-- Buttons -->
-        <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <!-- Microphone -->
+                <StackPanel Margin="0,20,0,28">
+                    <CheckBox x:Name="MicrophoneCheckBox" Content="_Microphone audio"
+                              Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"
+                              AutomationProperties.HelpText="When checked, your microphone is recorded into the video's sound track."/>
+                    <TextBlock Style="{StaticResource BodyText}" FontSize="13" TextWrapping="Wrap" Opacity="0.85" Margin="0,6,0,0">
+                        When checked, your default microphone is recorded into the video's
+                        sound track. Unchecked (the default), the recording has no sound
+                        at all. There's no separate microphone picker yet - it always uses
+                        whichever microphone is set as your default in Windows.
+                    </TextBlock>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Buttons stay fixed at the bottom, outside the scrollable area,
+             so Save and Cancel are always visible without needing to
+             scroll down to reach them. -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="28,12,28,20">
             <Button x:Name="SaveButton" Content="_Save" Style="{StaticResource PrimaryButton}"
                     Margin="0,0,10,0" Click="SaveButton_Click" IsDefault="True"/>
             <Button x:Name="CancelButton" Content="_Cancel" Style="{StaticResource SecondaryButton}"

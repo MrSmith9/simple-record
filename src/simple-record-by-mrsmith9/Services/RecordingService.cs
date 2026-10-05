@@ -17,8 +17,9 @@ namespace SimpleRecord.Services
     ///
     /// Records to an MP4 (H.264) file. The source can be the whole primary
     /// monitor, one specific window, or a custom pixel area on the primary
-    /// monitor - see <see cref="RecordingSourceSelection"/>. No audio yet;
-    /// that's added in a later part.
+    /// monitor - see <see cref="RecordingSourceSelection"/>. Microphone
+    /// audio is optional (off unless the caller asks for it); system/
+    /// speaker audio is not offered yet.
     /// </summary>
     public class RecordingService
     {
@@ -57,11 +58,12 @@ namespace SimpleRecord.Services
         /// whatever source (whole screen / window / custom area) is
         /// described by <paramref name="source"/>, saved at the given
         /// output size (or the source's own size, if <paramref
-        /// name="resolution"/> is Automatic). The file name is generated
-        /// automatically from the current date and time, so recordings
-        /// never overwrite each other.
+        /// name="resolution"/> is Automatic), with or without microphone
+        /// audio depending on <paramref name="microphoneEnabled"/>. The
+        /// file name is generated automatically from the current date and
+        /// time, so recordings never overwrite each other.
         /// </summary>
-        public void Start(string outputFolder, RecordingSourceSelection source, VideoResolutionPreset resolution)
+        public void Start(string outputFolder, RecordingSourceSelection source, VideoResolutionPreset resolution, bool microphoneEnabled)
         {
             if (State != RecordingState.Idle)
             {
@@ -107,9 +109,10 @@ namespace SimpleRecord.Services
                 OutputOptions = outputOptions,
                 AudioOptions = new AudioOptions
                 {
-                    // Audio is switched on in a later part, once we add the
-                    // system audio / microphone toggles to the UI.
-                    IsAudioEnabled = false
+                    IsAudioEnabled = microphoneEnabled,
+                    AudioSources = microphoneEnabled
+                    ? new List<AudioSourceBase> { CaptureAudioSource.Default }
+                    : new List<AudioSourceBase>()
                 },
                 VideoEncoderOptions = new VideoEncoderOptions
                 {

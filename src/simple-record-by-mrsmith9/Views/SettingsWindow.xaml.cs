@@ -32,6 +32,8 @@ namespace SimpleRecord.Views
 
             _selectedBackgroundPath = currentSettings.BackgroundImagePath;
             UpdateBackgroundDisplay();
+
+            MicrophoneCheckBox.IsChecked = currentSettings.MicrophoneEnabled;
         }
 
         private RadioButton RadioButtonFor(VideoResolutionPreset preset) => preset switch
@@ -124,7 +126,8 @@ namespace SimpleRecord.Views
             {
                 OutputFolder = _selectedOutputFolder,
                 Resolution = SelectedResolution(),
-                BackgroundImagePath = _selectedBackgroundPath
+                BackgroundImagePath = _selectedBackgroundPath,
+                MicrophoneEnabled = MicrophoneCheckBox.IsChecked == true
             };
             DialogResult = true;
         }
