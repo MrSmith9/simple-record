@@ -1,0 +1,49 @@
+<Window x:Class="RecorderByKyleSmith.Views.RegionSelectWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Select an area to record"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Topmost="True"
+        Background="#66000000"
+        WindowStartupLocation="Manual"
+        Left="0" Top="0"
+        Cursor="Cross"
+        Focusable="True"
+        Loaded="RegionSelectWindow_Loaded"
+        KeyDown="Window_KeyDown"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        MouseMove="Window_MouseMove"
+        MouseLeftButtonUp="Window_MouseLeftButtonUp">
+
+    <Grid>
+        <Canvas x:Name="SelectionCanvas">
+            <Rectangle x:Name="SelectionRectangle" Stroke="{StaticResource AccentBrush}" StrokeThickness="2"
+                       Fill="#334F8EF7" Visibility="Collapsed" IsHitTestVisible="False"/>
+        </Canvas>
+
+        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="20,14"
+                HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,24,0,0">
+            <StackPanel>
+                <TextBlock Text="Click and drag to select an area to record."
+                           Style="{StaticResource BodyText}" Foreground="{StaticResource TextPrimaryBrush}"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Keyboard: Arrow keys move the selection. Shift + Arrow keys resize it."
+                           Style="{StaticResource BodyText}" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="SizeReadoutText" Text="No area selected yet."
+                           Style="{StaticResource BodyText}" FontWeight="SemiBold"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           HorizontalAlignment="Center" Margin="0,6,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,40">
+            <Button x:Name="ConfirmButton" Content="_Use This Area" Style="{StaticResource PrimaryButton}"
+                    Margin="0,0,16,0" Click="ConfirmButton_Click" IsEnabled="False"/>
+            <Button x:Name="CancelButton" Content="_Cancel" Style="{StaticResource SecondaryButton}"
+                    Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

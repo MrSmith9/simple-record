@@ -1,0 +1,45 @@
+<Window x:Class="RecorderByKyleSmith.Views.WindowSelectDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Choose a window to record"
+        Width="560" Height="520"
+        MinWidth="420" MinHeight="380"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource BackgroundBrush}"
+        FontFamily="Segoe UI">
+
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Choose a window to record" Style="{StaticResource HeadingText}" Margin="0,0,0,4"/>
+        <TextBlock Grid.Row="1" Style="{StaticResource BodyText}" Margin="0,0,0,12">
+            Use the Up and Down arrow keys to move through the list, then press Enter - or click a window, then click Select.
+        </TextBlock>
+
+        <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="4">
+            <Grid>
+                <ListBox x:Name="WindowListBox" Background="Transparent" BorderThickness="0" FontSize="16"
+                         Foreground="{StaticResource TextPrimaryBrush}" Padding="8"
+                         SelectionMode="Single" MouseDoubleClick="WindowListBox_MouseDoubleClick"/>
+                <TextBlock x:Name="EmptyListText" Style="{StaticResource BodyText}"
+                           Text="No open windows were found. Try Refresh List, or open something first."
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           TextAlignment="Center" MaxWidth="320" Visibility="Collapsed"/>
+            </Grid>
+        </Border>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button x:Name="RefreshButton" Content="_Refresh List" Style="{StaticResource SecondaryButton}"
+                    Margin="0,0,12,0" Click="RefreshButton_Click"/>
+            <Button x:Name="CancelButton" Content="_Cancel" Style="{StaticResource SecondaryButton}"
+                    Margin="0,0,12,0" Click="CancelButton_Click" IsCancel="True"/>
+            <Button x:Name="SelectButton" Content="_Select" Style="{StaticResource PrimaryButton}"
+                    Click="SelectButton_Click" IsDefault="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

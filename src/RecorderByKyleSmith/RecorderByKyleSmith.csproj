@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>RecorderByKyleSmith</RootNamespace>
+    <AssemblyName>RecorderByKyleSmith</AssemblyName>
+
+    <!-- ScreenRecorderLib wraps native Windows components, so this project
+         must always build as x64, never "AnyCPU" - x64 matches almost
+         every modern Windows PC, including yours. Setting <Platform> (not
+         just <PlatformTarget>) is what makes this apply even when building
+         from the command line with "dotnet build"/"dotnet publish" and no
+         .sln file involved, which is what AnyCPU was slipping in from. -->
+    <Platform>x64</Platform>
+    <PlatformTarget>x64</PlatformTarget>
+
+    <AssemblyTitle>Recording by Kyle Smith</AssemblyTitle>
+    <Product>Recording by Kyle Smith</Product>
+    <Company>Kyle Smith</Company>
+    <Copyright>© 2026 Kyle Smith. All rights reserved.</Copyright>
+    <Version>0.3.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- MIT licensed. See THIRD_PARTY_NOTICES.md in the project root. -->
+    <PackageReference Include="ScreenRecorderLib" Version="7.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Embedded into the app itself, so the background always loads no
+         matter where the .exe is run from. -->
+    <Resource Include="Assets\AppBackground.jpg" />
+  </ItemGroup>
+
+</Project>
