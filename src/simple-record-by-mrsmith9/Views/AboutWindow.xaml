@@ -18,7 +18,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Simple Record" Style="{StaticResource HeadingText}"/>
-        <TextBlock Grid.Row="1" Text="Version 0.9.3 - compact toolbar design + Dark/Light theme (instant switching) + core recording + source selection + update checking + settings + microphone"
+        <TextBlock Grid.Row="1" Text="Version 0.11.0 - compact toolbar design + Dark/Light theme (instant switching) + core recording + source selection + manual/automatic update checking + settings + microphone + animated GIF export + bookmarks with clip/GIF export + screenshot"
                    Style="{StaticResource BodyText}" Margin="0,4,0,16"/>
 
         <StackPanel Grid.Row="2">
@@ -30,9 +30,10 @@
                 © 2026 Kyle Smith. All rights reserved.
             </TextBlock>
             <TextBlock Style="{StaticResource BodyText}" TextWrapping="Wrap" Margin="0,16,0,0" FontSize="13">
-                This app uses the open-source library ScreenRecorderLib (MIT License)
-                to capture and encode video. See THIRD_PARTY_NOTICES.md in the project
-                folder for the full license text.
+                This app uses the open-source libraries ScreenRecorderLib (MIT License)
+                to capture and encode video, and Openize.Animated-GIF (Apache License 2.0)
+                for the optional animated GIF export. See THIRD_PARTY_NOTICES.md in the
+                project folder for the full license text.
             </TextBlock>
         </StackPanel>
 

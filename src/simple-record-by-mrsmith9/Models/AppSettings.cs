@@ -36,6 +36,15 @@ namespace SimpleRecord.Models
         /// </summary>
         public bool MicrophoneEnabled { get; set; } = false;
 
+        /// <summary>
+        /// Whether to also save an animated .gif alongside the normal .mp4
+        /// when a recording finishes. Off by default - GIFs have no sound,
+        /// far fewer colors than video, and get large fast for anything
+        /// more than a short clip, so this is an extra, not a replacement
+        /// for the video. See <see cref="Services.GifExporter"/>.
+        /// </summary>
+        public bool ExportGifEnabled { get; set; } = false;
+
         /// <summary>Used the very first time the app runs, before any settings have been saved.</summary>
         public static readonly string DefaultOutputFolder =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), "Simple Record");

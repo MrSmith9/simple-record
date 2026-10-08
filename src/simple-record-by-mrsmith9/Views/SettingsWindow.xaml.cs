@@ -1,8 +1,11 @@
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
 using SimpleRecord.Models;
+using SimpleRecord.Services;
 
 namespace SimpleRecord.Views
 {
@@ -18,6 +21,11 @@ namespace SimpleRecord.Views
 
         private string _selectedOutputFolder;
 
+        // Set only after "Check for Updates" finds something newer - "Get
+        // It" stays hidden until there's actually somewhere for it to send
+        // the user.
+        private UpdateInfo? _pendingUpdate;
+
         public SettingsWindow(AppSettings currentSettings)
         {
             InitializeComponent();
@@ -31,6 +39,9 @@ namespace SimpleRecord.Views
             (currentSettings.Theme == AppTheme.Light ? LightThemeRadio : DarkThemeRadio).IsChecked = true;
 
             MicrophoneCheckBox.IsChecked = currentSettings.MicrophoneEnabled;
+            ExportGifCheckBox.IsChecked = currentSettings.ExportGifEnabled;
+
+            CurrentVersionText.Text = $"You're using version {UpdateChecker.FormatVersion(UpdateChecker.GetCurrentVersion())}.";
         }
 
         private RadioButton RadioButtonFor(VideoResolutionPreset preset) => preset switch
@@ -77,7 +88,8 @@ namespace SimpleRecord.Views
                 OutputFolder = _selectedOutputFolder,
                 Resolution = SelectedResolution(),
                 Theme = LightThemeRadio.IsChecked == true ? AppTheme.Light : AppTheme.Dark,
-                MicrophoneEnabled = MicrophoneCheckBox.IsChecked == true
+                MicrophoneEnabled = MicrophoneCheckBox.IsChecked == true,
+                ExportGifEnabled = ExportGifCheckBox.IsChecked == true
             };
             DialogResult = true;
         }
@@ -85,6 +97,65 @@ namespace SimpleRecord.Views
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
+        }
+
+        /// <summary>
+        /// Checks GitHub right now, on demand, instead of waiting for the
+        /// next time the app starts. Reports a clear result either way -
+        /// found an update, confirmed up to date, or couldn't check at all
+        /// (no internet, GitHub unreachable, or no release visible) - since
+        /// someone pressing this button is asking a direct question and
+        /// deserves a direct, honest answer rather than silence.
+        /// </summary>
+        private async void CheckUpdatesButton_Click(object sender, RoutedEventArgs e)
+        {
+            CheckUpdatesButton.IsEnabled = false;
+            GetUpdateButton.Visibility = Visibility.Collapsed;
+            _pendingUpdate = null;
+            UpdateStatusText.Text = "Checking for updates...";
+
+            (bool succeeded, UpdateInfo? update) =
+                await UpdateChecker.CheckForUpdateWithStatusAsync(UpdateChecker.GetCurrentVersion());
+
+            if (update != null)
+            {
+                _pendingUpdate = update;
+                UpdateStatusText.Text = $"A new version is available: {update.VersionText}.";
+                GetUpdateButton.Visibility = Visibility.Visible;
+            }
+            else if (succeeded)
+            {
+                UpdateStatusText.Text = "You're using the latest version.";
+            }
+            else
+            {
+                UpdateStatusText.Text =
+                    "Couldn't check for updates right now. This usually means no internet " +
+                    "connection, GitHub is temporarily unavailable, or no release has been " +
+                    "published yet - try again later.";
+            }
+
+            CheckUpdatesButton.IsEnabled = true;
+        }
+
+        private void GetUpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_pendingUpdate == null)
+            {
+                return;
+            }
+
+            try
+            {
+                // UseShellExecute=true opens the link in the user's default
+                // browser, the same as double-clicking it - it does not run
+                // anything on its own.
+                Process.Start(new ProcessStartInfo(_pendingUpdate.ReleasePageUrl) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                UpdateStatusText.Text = $"Couldn't open the download page automatically: {ex.Message}";
+            }
         }
     }
 }

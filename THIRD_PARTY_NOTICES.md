@@ -49,12 +49,55 @@ SOFTWARE.
 ScreenRecorderLib GitHub repository and copy the exact text here, just to
 be sure it matches word for word.
 
-## Windows Media Foundation / Desktop Duplication API
+## Openize.Animated-GIF
+
+- Project: https://github.com/openize-com/openize-animated-gif-net
+- License: Apache License 2.0
+- Used for: building the optional animated .gif file (the "Also save an
+  animated GIF" setting), from the still-image snapshots ScreenRecorderLib
+  captures while a recording runs.
+
+The Apache License 2.0 is another permissive open-source license, similar
+in spirit to MIT. In plain terms, it lets you:
+
+- Use the library in a closed-source, commercial, or personal app for free.
+- Keep your own app's source code private - you do NOT have to open-source
+  "Simple Record" because it uses an Apache-2.0-licensed library.
+- Modify the library if you ever need to.
+
+As with ScreenRecorderLib, the only real condition is that the license
+notice stays available somewhere in the project (this file covers that).
+
+```
+Copyright 2023 Openize
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
+**Before your first public release**, open the `LICENSE` file in the
+Openize.Animated-GIF GitHub repository and copy the exact text here, just
+to be sure it matches word for word.
+
+## Windows Media Foundation / Desktop Duplication API / Windows.Media.Editing
 
 These are built into Windows itself (part of Windows 10/11). ScreenRecorderLib
-uses them internally to capture the screen and encode video. You don't
-redistribute them and you don't need a separate license to use them -
-they're already on every Windows 10/11 PC.
+uses Media Foundation and Desktop Duplication internally to capture the
+screen and encode video. As of version 0.11.0, `Services/ClipExporter.cs`
+also uses Windows.Media.Editing directly (a different built-in Windows
+feature, for trimming a short "clip" out of a recording around a
+bookmarked moment - see that file's own comment for details). None of
+these are redistributed or need a separate license to use - they're
+already on every Windows 10/11 PC.
 
 ## What we deliberately avoided
 
@@ -68,3 +111,9 @@ they're already on every Windows 10/11 PC.
   source code is licensed under the GPL. Reusing GPL-licensed code inside
   a closed-source app like this one would require open-sourcing this app
   too. We're not using any OBS code.
+- **The "AnimatedGif" NuGet package (by mrousavy)** - this was the first
+  GIF-encoding library considered for the "Also save an animated GIF"
+  setting, but its LICENSE file is GPLv3, which has the same open-sourcing
+  requirement as OBS above. Openize.Animated-GIF (Apache 2.0, see above)
+  does the same job without that requirement, so that's what's used
+  instead.

@@ -2,7 +2,31 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <!-- 2026-10-08: bumped from plain "net8.0-windows" to this more
+         specific "versioned" Windows target so the app can call a few
+         Windows-provided features directly from C# (Windows.Media.Editing,
+         used by Services/ClipExporter.cs to build a short trimmed-video
+         "clip" from a bookmark - see Services/ClipExporter.cs's own
+         comment for what this feature is and why it needed this change).
+         No extra NuGet package is needed for this - the .NET SDK makes
+         these Windows APIs available to C# automatically whenever
+         TargetFramework is one of these more specific
+         "windowsX.0.XXXXX.0" versions, instead of the plain "-windows"
+         used before. If Visual Studio says the matching Windows SDK
+         version (10.0.19041.0) isn't installed, it will offer to install
+         it automatically the first time you open/build this project -
+         just say yes to that prompt. If the build instead fails saying
+         it can't find the Windows.Media.Editing/Windows.Storage types,
+         try adding the "Microsoft.Windows.SDK.Contracts" NuGet package
+         (right-click the project in Solution Explorer -> Manage NuGet
+         Packages -> Browse -> search for that exact name -> Install). -->
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <!-- This just means "compiled against the 10.0.19041.0 (Windows 10,
+         May 2020 Update) API set" - it does NOT raise what Windows
+         version the app needs to actually run. TargetPlatformMinVersion
+         below is the real "oldest Windows this can run on" setting, kept
+         the same as before this change. -->
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -27,7 +51,7 @@
     <Product>Simple Record</Product>
     <Company>Kyle Smith</Company>
     <Copyright>© 2026 Kyle Smith. All rights reserved.</Copyright>
-    <Version>0.9.3</Version>
+    <Version>0.11.0</Version>
 
     <!-- This is what gives the built .exe its icon - shown in File
          Explorer, and in the taskbar/Alt+Tab when SmartScreen/shell
@@ -38,6 +62,17 @@
   <ItemGroup>
     <!-- MIT licensed. See THIRD_PARTY_NOTICES.md in the project root. -->
     <PackageReference Include="ScreenRecorderLib" Version="7.0.1" />
+    <!-- Apache 2.0 licensed. Used only for the optional "Also save an
+         animated GIF" setting (see Services/GifExporter.cs) - builds a
+         .gif file from the periodic PNG snapshots ScreenRecorderLib
+         captures alongside a video recording. See THIRD_PARTY_NOTICES.md. -->
+    <PackageReference Include="Openize.Animated-GIF" Version="25.5.0" />
+    <!-- Lets GifExporter.cs load the PNG snapshot files as images before
+         handing them to Openize.Animated-GIF. Not included by default in
+         .NET anymore (you have to reference it yourself) - safe to use
+         here since this project already targets Windows only
+         (net8.0-windows). -->
+    <PackageReference Include="System.Drawing.Common" Version="10.0.12" />
   </ItemGroup>
 
   <ItemGroup>

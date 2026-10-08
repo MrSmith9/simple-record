@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Simple Record"
         Icon="/Assets/AppIcon.ico"
-        Width="460"
+        Width="500"
         SizeToContent="Height"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
@@ -184,7 +184,7 @@
                     </Button>
 
                     <Button x:Name="StartButton" Style="{StaticResource IconToolButton}"
-                            Click="StartButton_Click"
+                            Margin="0,0,6,0" Click="StartButton_Click"
                             AutomationProperties.Name="Start Recording"
                             AutomationProperties.HelpText="Asks for confirmation, then starts recording.">
                         <StackPanel>
@@ -194,6 +194,25 @@
                                 <Ellipse Width="16" Height="16" Fill="{StaticResource RecordBrush}"/>
                             </Grid>
                             <TextBlock Text="Record" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- 2026-10-08: Screenshot works any time (not just
+                         while recording), so it's present in both panels
+                         - this is the idle-panel copy. F9 is the keyboard
+                         shortcut (Window_PreviewKeyDown in the code-behind). -->
+                    <Button x:Name="ScreenshotButtonIdle" Style="{StaticResource IconToolButton}"
+                            Click="ScreenshotButton_Click"
+                            AutomationProperties.Name="Take Screenshot"
+                            AutomationProperties.HelpText="Saves an instant picture (F9) of your whole primary screen.">
+                        <StackPanel>
+                            <Grid Width="24" Height="18" Margin="0,3,0,6" HorizontalAlignment="Center">
+                                <Border CornerRadius="3" Background="{StaticResource AccentBrush}"/>
+                                <Border Width="8" Height="4" CornerRadius="1" Background="{StaticResource AccentBrush}"
+                                        HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-4,0,0"/>
+                                <Ellipse Width="10" Height="10" Fill="{StaticResource SurfaceBrush}"/>
+                            </Grid>
+                            <TextBlock Text="Screenshot" HorizontalAlignment="Center" TextAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -218,6 +237,40 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <!-- 2026-10-08: Bookmark + Screenshot, new. Bookmark
+                         only makes sense while actually recording/paused
+                         (enabled/disabled in SetRecordingUiState, same as
+                         Pause/Stop); Screenshot works regardless of
+                         recording state, so this is its recording-panel
+                         copy (see ScreenshotButtonIdle above for the
+                         other one). F8/F9 are the keyboard shortcuts. -->
+                    <Button x:Name="BookmarkButton" Style="{StaticResource IconToolButton}"
+                            Margin="0,0,6,0" Click="BookmarkButton_Click" IsEnabled="False"
+                            AutomationProperties.Name="Add Bookmark"
+                            AutomationProperties.HelpText="Marks this moment (F8) so you can turn it into a short clip or GIF once the recording finishes.">
+                        <StackPanel>
+                            <Path Width="18" Height="20" Stretch="Uniform" Margin="0,0,0,6" HorizontalAlignment="Center"
+                                  Fill="{StaticResource IconPurpleBrush}"
+                                  Data="M2,1 L16,1 L16,21 L9,15 L2,21 Z"/>
+                            <TextBlock Text="Bookmark" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="ScreenshotButtonRecording" Style="{StaticResource IconToolButton}"
+                            Margin="0,0,6,0" Click="ScreenshotButton_Click"
+                            AutomationProperties.Name="Take Screenshot"
+                            AutomationProperties.HelpText="Saves an instant picture (F9) of your whole primary screen, separate from the recording.">
+                        <StackPanel>
+                            <Grid Width="24" Height="18" Margin="0,3,0,6" HorizontalAlignment="Center">
+                                <Border CornerRadius="3" Background="{StaticResource AccentBrush}"/>
+                                <Border Width="8" Height="4" CornerRadius="1" Background="{StaticResource AccentBrush}"
+                                        HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-4,0,0"/>
+                                <Ellipse Width="10" Height="10" Fill="{StaticResource SurfaceBrush}"/>
+                            </Grid>
+                            <TextBlock Text="Screenshot" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
                     <Button x:Name="PauseButton" Style="{StaticResource IconToolButton}"
                             Margin="0,0,6,0" Click="PauseButton_Click" IsEnabled="False"
                             AutomationProperties.Name="Pause Recording">

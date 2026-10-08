@@ -118,6 +118,65 @@ version 2004/May 2020 Update or newer, which almost every PC has by now;
 on a much older Windows 10, the red line would end up in the recording
 too, which isn't dangerous, just not ideal.)
 
+## Bookmarks, clips, and screenshots
+
+New in version 0.11.0.
+
+- **Bookmark** - a button that appears in the recording-status row
+  (alongside Pause/Stop), or the **F8** key - marks "something important
+  just happened here" while you're recording or paused. It doesn't save
+  anything by itself; it just remembers the moment, so you can decide
+  what to do with it once the recording finishes. You can set as many
+  bookmarks as you like during one recording.
+- **Screenshot** - a button in either toolbar row, or the **F9** key -
+  saves an instant picture (`.png`) of your whole primary screen right
+  away, into the same folder as your recordings. This works at any
+  time, whether or not a recording is running, and always captures the
+  whole screen regardless of what source (window/area) is currently
+  selected for recording.
+- Both **F8** and **F9** only work while the Simple Record window itself
+  has focus (not system-wide "global" shortcuts that work from inside
+  another app/game) - this was a deliberate choice to keep the first
+  version of this feature simpler and lower-risk; true global hotkeys
+  are still tracked as a possible future addition (see the Roadmap).
+  Both actions are also always reachable as ordinary toolbar buttons
+  (Tab + Enter/Space), not just via the keys.
+
+**After a recording that had at least one bookmark finishes**, a
+**Bookmarks** window opens automatically, listing each bookmark with its
+timestamp and two buttons:
+
+- **Export Clip** - saves a short trimmed `.mp4` (a few seconds before
+  and after the bookmarked moment) next to your full recording, named
+  `<recording name>_bookmark1_clip.mp4`, `..._bookmark2_clip.mp4`, and so
+  on. This uses a Windows-provided video-editing feature and re-encodes
+  the trimmed section, so it takes a few seconds to build, and its
+  quality is capped at 1080p regardless of what quality the original
+  recording was made at.
+- **Export GIF** - saves a short animated `.gif` (same few-seconds
+  window) built from the same periodic snapshot pictures the whole-
+  recording GIF feature uses (see "How the GIF export works" below) -
+  named `<recording name>_bookmark1.gif`, and so on.
+
+You can export as many or as few bookmarks as you like, in either or
+both formats, and closing the Bookmarks window at any point - even
+without exporting anything - is completely safe; your full recording is
+already saved either way, and nothing is lost by just closing the
+window.
+
+**A few known limits of this first version**, worth knowing about:
+- The clip/GIF window around a bookmark is fixed at 3 seconds before and
+  3 seconds after (not adjustable yet).
+- Matching a bookmark's exact moment to the right snapshot pictures for
+  "Export GIF" is an approximation (based on when each snapshot picture
+  was saved to disk), not a frame-perfect match - it can drift slightly
+  if the recording was paused and resumed before the bookmark.
+- "Export Clip" needs the Windows feature mentioned above, which
+  required a project-level change (the exact Windows SDK version the
+  app is built against) - if clip export doesn't work at all for you,
+  this is the most likely thing to check first; GIF export doesn't
+  depend on this change and should be unaffected either way.
+
 ## Settings
 
 Click **Settings** (top of the window, next to About) to open:
@@ -155,6 +214,22 @@ Click **Settings** (top of the window, next to About) to open:
   yet to choose a specific microphone if you have more than one. System/
   speaker audio (recording sounds the PC itself is playing) isn't
   available yet - only the microphone.
+- **Also save an animated GIF** - a checkbox to also save a `.gif` copy
+  of every recording, alongside the normal `.mp4` video, with the same
+  file name. Off (unchecked) by default. A GIF has no sound and far
+  fewer colors than video, and gets large quickly for anything longer
+  than a short clip, so this is an extra file for sharing short demos
+  easily (for example, pasting straight into Discord or GitHub, which
+  both play GIFs automatically without needing a video player) - it is
+  never a replacement for the video. See "How the GIF export works"
+  below for how it's built.
+- **Updates** - shows the version you're currently running, plus a
+  **Check for Updates** button that checks GitHub right now instead of
+  waiting for the automatic check that happens when the app starts (see
+  "Startup update check" below). It always gives a clear answer: a new
+  version found (with a **Get It** button to open the download page), "you're
+  using the latest version," or "couldn't check right now" if there's no
+  internet connection or GitHub can't be reached.
 
 Click **Save** to keep your changes (they're remembered for next time you
 open the app) or **Cancel** to discard them. Everything in this window is
@@ -185,15 +260,48 @@ recording, so in that case your choice is saved but won't show until you
 close and reopen the app normally afterward. The status bar message
 tells you which of the two happened.
 
+### How the GIF export works
+
+When "Also save an animated GIF" is checked, the app does **not** create
+the GIF by converting the finished `.mp4` afterward - instead, while the
+recording is running, it also asks ScreenRecorderLib to save a still
+picture (a `.png`) of the screen every 200 milliseconds (5 pictures per
+second) into a temporary folder next to the video. As soon as the
+recording stops and the video file is finished, those still pictures are
+stitched together into one looping `.gif` with the same name as the
+video, and the temporary folder is deleted.
+
+This approach was chosen over decoding the finished video because it
+avoids needing a video-decoding library at all (keeping the "no
+FFmpeg/GPL dependencies" rule below), at the cost of the GIF being a
+slightly different, lower (5fps) frame rate than the video itself - which
+is normal and expected for GIFs, and keeps the file size reasonable.
+
+If building the GIF fails for any reason (for example, running out of
+disk space while writing the temporary pictures), the status bar says so
+clearly, but **the video recording itself is never affected** - the video
+is always saved normally whether or not the GIF succeeds.
+
 ## 1. Prerequisites
 
 - **Visual Studio 2022** with the **".NET desktop development"** workload.
   - To check: open Visual Studio Installer > Modify (next to your VS 2022
     install) > make sure ".NET desktop development" is ticked.
 - **.NET 8 SDK**. Recent Visual Studio 2022 installs (17.8+) include this
-  automatically. If Visual Studio says it can't find `net8.0-windows`,
+  automatically. If Visual Studio says it can't find `net8.0-windows10.0.19041.0`,
   install the SDK from https://dotnet.microsoft.com/download/dotnet/8.0.
-- **Windows 10 (version 1903 or later) or Windows 11**.
+- **Windows 10 SDK, version 10.0.19041.0 (2004/May 2020 Update) or later installed in Visual Studio**.
+  As of version 0.11.0, the project targets this specific Windows SDK
+  version (not just "Windows" generically) so it can use a couple of
+  Windows-provided features directly (see the .csproj's own comment on
+  `TargetFramework`). Visual Studio normally has this already via the
+  ".NET desktop development" workload; if it's missing, Visual Studio
+  will offer to install it the first time you open or build the project
+  after this change - just say yes to that prompt.
+- **Windows 10 (version 1809 or later) or Windows 11** to *run* the built
+  app - this is a separate, lower number from the SDK version above
+  (that one is what you build *against*; this one is what you can run
+  the finished app *on*).
 
 ## 2. Open the project
 
@@ -204,9 +312,10 @@ tells you which of the two happened.
    - If Visual Studio has any trouble with the `.sln` file, you can
      instead open `src\simple-record-by-mrsmith9\simple-record-by-mrsmith9.csproj`
      directly the same way - that works just as well.
-4. Visual Studio will restore the NuGet package (`ScreenRecorderLib`)
-   automatically. If it doesn't, right-click the solution in
-   **Solution Explorer** and choose **Restore NuGet Packages**.
+4. Visual Studio will restore the NuGet packages (`ScreenRecorderLib`,
+   `Openize.Animated-GIF`, `System.Drawing.Common`) automatically. If it
+   doesn't, right-click the solution in **Solution Explorer** and choose
+   **Restore NuGet Packages**.
 
 ## 3. Check the build settings
 
@@ -289,10 +398,13 @@ But most people downloading your app will expect a normal installer, so
 
 4. When it finishes, your shareable build is here:
    ```
-   src\simple-record-by-mrsmith9\bin\x64\Release\net8.0-windows\win-x64\publish\
+   src\simple-record-by-mrsmith9\bin\x64\Release\net8.0-windows10.0.19041.0\win-x64\publish\
    ```
    (The extra `x64\` segment appears because the project now always
-   builds as x64 instead of "Any CPU" - that's expected.)
+   builds as x64 instead of "Any CPU" - that's expected. The
+   `net8.0-windows10.0.19041.0\` segment changed name in version 0.11.0 -
+   see "Prerequisites" above for why - if you're on an older version's
+   instructions, it would say plain `net8.0-windows\` instead.)
    This whole folder is what step 5b packages into `setup.exe` - don't
    move, rename, or delete anything inside it before running step 5b.
 
@@ -414,13 +526,14 @@ will see the new version is newer and show the banner.
 ## 3rd-party software and licensing
 
 See `THIRD_PARTY_NOTICES.md` in this folder for the full explanation of
-what ScreenRecorderLib is, why it's safe to use in a closed-source app,
-and what was deliberately avoided (FFmpeg linking, OBS source code) and why.
+what ScreenRecorderLib and Openize.Animated-GIF are, why they're safe to
+use in a closed-source app, and what was deliberately avoided (FFmpeg
+linking, OBS source code, and a GPLv3 GIF library) and why.
 
-Short version: everything used here (ScreenRecorderLib, and Windows' own
-Media Foundation underneath it) is free to use in a personal or
-commercial, closed-source Windows app, with no royalties and no
-obligation to publish your own source code.
+Short version: everything used here (ScreenRecorderLib, Openize.Animated-
+GIF, and Windows' own Media Foundation underneath it) is free to use in a
+personal or commercial, closed-source Windows app, with no royalties and
+no obligation to publish your own source code.
 
 ## Project structure
 
@@ -444,9 +557,13 @@ simple-record-by-mrsmith9/
         WindowSelectDialog.xaml(.cs)    - "choose a window" list
         RegionSelectWindow.xaml(.cs)    - "drag out a custom area" overlay
         RegionBoundaryOverlay.xaml(.cs) - red border shown during a Custom Area recording
-        SettingsWindow.xaml(.cs)        - save location, quality, appearance, microphone
+        SettingsWindow.xaml(.cs)        - save location, quality, appearance, microphone, GIF export
+        BookmarksWindow.xaml(.cs)       - lists a recording's bookmarks, Export Clip/GIF per one
       Services/
         RecordingService.cs             - wraps the recording engine
+        GifExporter.cs                  - builds a .gif from a recording's PNG snapshots
+        ClipExporter.cs                 - builds a short trimmed .mp4 clip around a bookmark
+        ScreenshotService.cs            - saves an instant .png of the primary screen
         UpdateChecker.cs                - checks GitHub Releases for a newer version
         SettingsService.cs              - loads/saves settings.json in %AppData%
         ThemeManager.cs                 - switches between the Dark/Light color dictionaries
@@ -455,9 +572,11 @@ simple-record-by-mrsmith9/
         RecordingSourceMode.cs          - FullScreen / Window / Region
         RecordingSourceSelection.cs     - the current "what to record" choice
         WindowInfo.cs                   - a simple, app-level window reference
-        AppSettings.cs                  - save folder, quality, theme, microphone choices
+        AppSettings.cs                  - save folder, quality, theme, microphone, GIF export choices
         VideoResolutionPreset.cs        - Automatic / 720p / 1080p / 2K / 4K / 8K
         AppTheme.cs                     - Dark / Light
+        Bookmark.cs                     - one marked moment (elapsed time) during a recording
+        RecordingResult.cs              - data handed to the Bookmarks window once recording finishes
       Resources/
         Styles.xaml                     - fonts, button/card/field styles (not colors - see below)
         Theme.Dark.xaml                 - the Dark theme's color palette
@@ -496,9 +615,13 @@ settings) mostly involve editing one file.
 4. ~~Part 4: Choose what to record - a specific open window, or a
    custom rectangular area, not just the whole screen.~~ - **done**
    (primary monitor only for window/area selection, for now)
-5. **Part 5**: Global keyboard shortcuts (start/stop from outside the
-   app window) and a small always-on-top recording indicator so it's
-   obvious recording is active even if the main window is minimized.
+5. **Part 5 (partial)**: Global keyboard shortcuts and a small always-on-top
+   recording indicator. ~~In-app keyboard shortcuts for Bookmark (F8) and
+   Screenshot (F9)~~ - **done**, see "Bookmarks, clips, and screenshots"
+   above - but these only work while Simple Record's own window has
+   focus. True **global** shortcuts (start/stop/bookmark/screenshot from
+   outside the app window, e.g. while a game is focused) and the
+   always-on-top recording indicator are still open.
 6. **Part 6 (partial)**: Visual polish. ~~Custom app icon~~ - **done**.
    ~~Theme refinement~~ - **done**. ~~A Dark/Light theme toggle~~ -
    **done**, see item 14 below. A high-contrast theme is still open.
@@ -523,3 +646,21 @@ settings) mostly involve editing one file.
     bar and the background-image feature (both flagged by Kyle after
     testing item 13), and added a Dark/Light theme choice in Settings~~ -
     **done**, not yet confirmed working by Kyle.
+15. ~~Part 15: fixed the Light theme's Settings text being unreadable
+    (cached style colors), then fixed a startup crash that fix
+    introduced, and added a manual "Check for Updates" button/section in
+    Settings~~ - **done**, not yet confirmed working by Kyle.
+16. ~~Part 16: "Also save an animated GIF" setting - captures periodic
+    still pictures during recording and stitches them into a looping
+    `.gif` once the video finishes, using the Apache-2.0-licensed
+    Openize.Animated-GIF library~~ - **done**, not yet confirmed working
+    by Kyle. See "How the GIF export works" above.
+17. ~~Part 17: Bookmarks (mark a moment during recording, with a Bookmarks
+    window afterward to export a short trimmed clip and/or GIF per
+    bookmark) + in-app keyboard shortcuts for Bookmark (F8) and
+    Screenshot (F9)~~ - **done**, not yet confirmed working by Kyle. See
+    "Bookmarks, clips, and screenshots" above. This is the first feature
+    that needed changing the project's TargetFramework (see the .csproj's
+    comment) - worth double-checking the whole app still builds and runs
+    normally, not just the new feature, since that kind of change is
+    riskier than most.

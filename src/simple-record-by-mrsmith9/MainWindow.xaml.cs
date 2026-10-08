@@ -36,6 +36,7 @@ namespace SimpleRecord
             _recordingService.StatusMessage += (_, message) => Dispatcher.Invoke(() => SetStatus(message));
             _recordingService.RecordingCompleted += (_, filePath) => Dispatcher.Invoke(() => OnRecordingCompleted(filePath));
             _recordingService.RecordingFailed += (_, error) => Dispatcher.Invoke(() => OnRecordingFailed(error));
+            _recordingService.BookmarksReady += (_, result) => Dispatcher.Invoke(() => ShowBookmarksWindow(result));
 
             _elapsedTimer.Tick += (_, _) => UpdateTimerDisplay();
 
@@ -71,16 +72,31 @@ namespace SimpleRecord
         }
 
         /// <summary>
-        /// A hand-wired Alt+F4 as a safety net. WPF windows are normally
-        /// expected to still close on Alt+F4 even with a custom title bar
-        /// (WindowStyle="None"), but that's hard to verify without being
-        /// able to run the app here - this guarantees it either way.
+        /// Hand-wired keyboard shortcuts. Alt+F4 is a safety net - WPF
+        /// windows are normally expected to still close on Alt+F4 even
+        /// with a custom title bar (WindowStyle="None"), but that's hard
+        /// to verify without being able to run the app here, so it's
+        /// guaranteed either way. F8 (Bookmark) and F9 (Screenshot) are
+        /// new as of 2026-10-08 - both only work while this window has
+        /// focus (not system-wide/global shortcuts), and both are also
+        /// reachable as ordinary buttons (see the Bookmark/Screenshot
+        /// buttons below) for anyone who doesn't know or use the keys.
         /// </summary>
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.F4 && Keyboard.Modifiers == ModifierKeys.Alt)
             {
                 Close();
+            }
+            else if (e.Key == Key.F8 && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                BookmarkButton_Click(this, new RoutedEventArgs());
+                e.Handled = true;
+            }
+            else if (e.Key == Key.F9 && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                ScreenshotButton_Click(this, new RoutedEventArgs());
+                e.Handled = true;
             }
         }
 
@@ -237,7 +253,7 @@ namespace SimpleRecord
                 return;
             }
 
-            _recordingService.Start(_settings.OutputFolder, _sourceSelection, _settings.Resolution, _settings.MicrophoneEnabled);
+            _recordingService.Start(_settings.OutputFolder, _sourceSelection, _settings.Resolution, _settings.MicrophoneEnabled, _settings.ExportGifEnabled);
 
             if (_recordingService.State == RecordingState.Recording)
             {
@@ -296,11 +312,51 @@ namespace SimpleRecord
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
+            TimeSpan finalElapsed = ComputeCurrentElapsed();
             _elapsedTimer.Stop();
             StopButton.IsEnabled = false;
             PauseButton.IsEnabled = false;
+            BookmarkButton.IsEnabled = false;
             SetStatus("Finishing up and saving your recording...");
-            _recordingService.Stop();
+            _recordingService.Stop(finalElapsed);
+        }
+
+        /// <summary>
+        /// Marks the current moment during a recording so it can be
+        /// turned into a short clip or GIF afterward - see the Bookmarks
+        /// window, shown automatically once the recording finishes if
+        /// any bookmarks were set. Reachable by clicking the Bookmark
+        /// button or pressing F8 while this window has focus.
+        /// </summary>
+        private void BookmarkButton_Click(object sender, RoutedEventArgs e)
+        {
+            _recordingService.AddBookmark(ComputeCurrentElapsed());
+        }
+
+        /// <summary>
+        /// Saves an instant picture of the whole primary screen,
+        /// independent of whether a recording is running or what source
+        /// is currently selected for recording. Reachable by clicking
+        /// either Screenshot button (idle or recording panel) or
+        /// pressing F9 while this window has focus.
+        /// </summary>
+        private void ScreenshotButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string path = ScreenshotService.CaptureWholeScreen(_settings.OutputFolder);
+                SetStatus($"Screenshot saved: {path}");
+            }
+            catch (Exception ex)
+            {
+                SetStatus($"Couldn't take a screenshot: {ex.Message}");
+            }
+        }
+
+        private void ShowBookmarksWindow(RecordingResult result)
+        {
+            var bookmarksWindow = new BookmarksWindow(result) { Owner = this };
+            bookmarksWindow.ShowDialog();
         }
 
         private void AboutButton_Click(object sender, RoutedEventArgs e)
@@ -392,6 +448,7 @@ namespace SimpleRecord
             StartButton.IsEnabled = !isRecording;
             PauseButton.IsEnabled = isRecording;
             StopButton.IsEnabled = isRecording;
+            BookmarkButton.IsEnabled = isRecording;
 
             // PauseButton's Content is an icon+label layout, not plain
             // text, so only the label TextBlock's Text is updated here -
@@ -458,8 +515,25 @@ namespace SimpleRecord
 
         private void UpdateTimerDisplay()
         {
-            TimeSpan elapsed = _pausedElapsed + (DateTime.Now - _recordingStartedAt);
-            ElapsedTimeText.Text = elapsed.ToString(@"hh\:mm\:ss");
+            ElapsedTimeText.Text = ComputeCurrentElapsed().ToString(@"hh\:mm\:ss");
+        }
+
+        /// <summary>
+        /// The recording's current length, matching exactly what the
+        /// on-screen timer shows. While actually recording this is
+        /// "however much was already banked before the last Resume" plus
+        /// "time since that Resume" - but while Paused, no time should be
+        /// added at all (the timer is frozen), so this reads only the
+        /// already-banked amount instead of also counting the paused
+        /// gap. Used by the timer display itself, and (new as of
+        /// 2026-10-08) by Bookmark/Stop, both of which can be used while
+        /// Paused and need this to stay correct in that case too.
+        /// </summary>
+        private TimeSpan ComputeCurrentElapsed()
+        {
+            return _recordingService.State == RecordingState.Paused
+                ? _pausedElapsed
+                : _pausedElapsed + (DateTime.Now - _recordingStartedAt);
         }
 
         private void SetStatus(string message)

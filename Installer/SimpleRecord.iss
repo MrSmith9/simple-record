@@ -31,7 +31,7 @@
 ; ============================================================================
 
 #define MyAppName "Simple Record"
-#define MyAppVersion "0.9.3"
+#define MyAppVersion "0.11.0"
 #define MyAppPublisher "Kyle Smith"
 #define MyAppExeName "simple-record-by-mrsmith9.exe"
 
@@ -39,7 +39,13 @@
 ; section 5). If you ever change the publish command or target a different
 ; runtime identifier than win-x64, update this path to match - otherwise
 ; Inno Setup will fail to compile with a "file not found" error.
-#define MyPublishDir "..\src\simple-record-by-mrsmith9\bin\x64\Release\net8.0-windows\win-x64\publish"
+;
+; 2026-10-08: this folder name changed from "net8.0-windows" to
+; "net8.0-windows10.0.19041.0" because the app's TargetFramework in the
+; .csproj changed (see that file's comment) - if you ever bump the
+; TargetFramework again, this path needs to change to match, the same
+; way MyAppVersion below needs to match the csproj's <Version>.
+#define MyPublishDir "..\src\simple-record-by-mrsmith9\bin\x64\Release\net8.0-windows10.0.19041.0\win-x64\publish"
 
 [Setup]
 ; This ID stays the same across every version - it's how Windows

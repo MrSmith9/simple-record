@@ -93,7 +93,7 @@
                 <Border Style="{StaticResource Divider}" Margin="0,20,0,20"/>
 
                 <!-- Microphone -->
-                <StackPanel Margin="0,0,0,28">
+                <StackPanel Margin="0,0,0,20">
                     <CheckBox x:Name="MicrophoneCheckBox" Content="_Microphone audio" Style="{StaticResource ThemedCheckBox}"
                               FontWeight="SemiBold"
                               AutomationProperties.HelpText="When checked, your microphone is recorded into the video's sound track."/>
@@ -104,6 +104,40 @@
                         whichever microphone is set as your default in Windows.
                     </TextBlock>
                 </StackPanel>
+
+                <Border Style="{StaticResource Divider}" Margin="0,0,0,20"/>
+
+                <!-- Animated GIF export -->
+                <StackPanel Margin="0,0,0,20">
+                    <CheckBox x:Name="ExportGifCheckBox" Content="Also save an animated _GIF" Style="{StaticResource ThemedCheckBox}"
+                              FontWeight="SemiBold"
+                              AutomationProperties.HelpText="When checked, an animated .gif of the recording is saved alongside the .mp4 video."/>
+                    <TextBlock Style="{StaticResource BodyText}" FontSize="13" TextWrapping="Wrap" Opacity="0.85" Margin="0,6,0,0">
+                        When checked, a second file - an animated .gif, with the same name
+                        as the video - is saved next to every recording. GIFs have no sound
+                        and far fewer colors than video, and get large fast for anything more
+                        than a short clip, so this is an extra file, not a replacement for
+                        the .mp4. Unchecked (the default), only the video is saved.
+                    </TextBlock>
+                </StackPanel>
+
+                <Border Style="{StaticResource Divider}" Margin="0,0,0,20"/>
+
+                <!-- Updates -->
+                <TextBlock Text="Updates:" Style="{StaticResource FieldLabel}"/>
+
+                <TextBlock x:Name="CurrentVersionText" Style="{StaticResource BodyText}" FontSize="13" Margin="0,0,0,12"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                    <Button x:Name="CheckUpdatesButton" Content="_Check for Updates" Style="{StaticResource SecondaryButton}"
+                            Click="CheckUpdatesButton_Click" Margin="0,0,10,0"
+                            AutomationProperties.HelpText="Checks GitHub for a newer version of Simple Record than the one you're running."/>
+                    <Button x:Name="GetUpdateButton" Content="_Get It" Style="{StaticResource SecondaryButton}"
+                            Click="GetUpdateButton_Click" Visibility="Collapsed"
+                            AutomationProperties.HelpText="Opens the download page for the new version in your browser."/>
+                </StackPanel>
+
+                <TextBlock x:Name="UpdateStatusText" Style="{StaticResource BodyText}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,28"/>
             </StackPanel>
         </ScrollViewer>
 

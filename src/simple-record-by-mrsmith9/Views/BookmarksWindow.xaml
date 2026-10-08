@@ -1,0 +1,43 @@
+<Window x:Class="SimpleRecord.Views.BookmarksWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Bookmarks - Simple Record"
+        Icon="/Assets/AppIcon.ico"
+        Width="540" Height="520"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{StaticResource BackgroundBrush}"
+        FontFamily="Segoe UI">
+
+    <!-- Opened automatically by MainWindow right after a recording
+         finishes, but only when at least one bookmark was set during it
+         (see RecordingService.BookmarksReady). Every row here is built
+         in code-behind (BuildBookmarkRows), not XAML data-binding, to
+         match how the rest of this app is written - plain event
+         handlers, no ViewModel/binding layer. -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="24,24,16,0">
+            <StackPanel>
+                <TextBlock Text="Bookmarks from this recording" Style="{StaticResource HeadingText}" Margin="0,0,0,8"/>
+                <TextBlock Style="{StaticResource BodyText}" FontSize="13" TextWrapping="Wrap" Opacity="0.85" Margin="0,0,0,18">
+                    For each moment you bookmarked, choose Export Clip (a short trimmed video,
+                    takes a few seconds to build) or Export GIF. Both are saved next to your
+                    full recording, which is already saved and safe either way. Closing this
+                    window without exporting anything is fine - nothing is lost.
+                </TextBlock>
+
+                <StackPanel x:Name="BookmarksPanel"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="24,12,24,20">
+            <Button x:Name="CloseButton" Content="_Close" Style="{StaticResource PrimaryButton}"
+                    Click="CloseButton_Click" IsDefault="True" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>
