@@ -21,6 +21,14 @@ what's planned next.
 
 ## What's built so far
 
+- A compact toolbar-style window (instead of a big full-size window) -
+  its own title bar with a **☰ menu** (Settings, About, Exit) and a
+  close button, a row of icon buttons to choose what to record and
+  start recording, and a live status row that replaces it while
+  recording. Click-and-drag the title bar to move the window, the same
+  as any other window. See "The redesigned window" below.
+- Choose between a **Dark** (default) or **Light** color theme for every
+  window in the app - see "Settings" below.
 - Choose what to record: your **whole screen** (primary monitor), a
   **specific open window**, or a **custom area** you drag out yourself.
   Only the primary monitor is supported for now - picking a window or
@@ -31,13 +39,15 @@ what's planned next.
 - Asks for confirmation before every recording starts, naming exactly
   what's about to be recorded.
 - Saves recordings to a folder you choose (Videos\Simple Record
-  by default), lets you pick a fixed recording size (720p up to 8K), lets
-  you choose your own picture as the main window's background, and lets
-  you turn microphone audio on or off - see "Settings" below.
+  by default), lets you pick a fixed recording size (720p up to 8K), and
+  lets you turn microphone audio on or off - see "Settings" below.
 - An About window with the copyright notice.
 - A custom app icon, shown in the title bar, taskbar, and on the `.exe`
   file itself.
-- A way to publish a shareable `.exe` (see section 5 below).
+- A way to publish a shareable `.exe` (see section 5 below), and a
+  proper Windows installer (`setup.exe`) that installs it with a Start
+  Menu shortcut and an uninstaller - see "Make a shareable installer
+  (setup.exe)" below.
 - A startup check for newer versions, shown as a visual banner with a
   download link - see "Checking for updates" below.
 - When recording a **Custom Area**, a thin red border now stays on screen
@@ -47,12 +57,37 @@ what's planned next.
 
 Not yet included (coming in later parts - see the roadmap below):
 system/speaker audio, file format options beyond MP4, global keyboard
-shortcuts, further theme polish, and a polished installer.
+shortcuts, and a high-contrast theme.
+
+## The redesigned window
+
+As of version 0.8.0, Simple Record is a small toolbar-style window
+instead of a big centered one - inspired by a screen-capture tool called
+CaptureWiz that Kyle shared a picture of, though not an exact copy of it.
+A few things work differently because of this:
+
+- **No normal Windows title bar.** The bar at the top (showing the app
+  icon and "Simple Record") is drawn by the app itself. To move the
+  window, click and hold anywhere on that bar (except the two buttons on
+  the right) and drag, the same as dragging a normal title bar.
+  (Version 0.9.0 removed the multi-color gradient stripe that used to
+  sit above this bar, and the optional background-image feature, in
+  favor of the plain Dark/Light theme described in "Settings" below.)
+- **The ☰ button** (top-right) opens a small menu with **Settings**,
+  **About**, and **Exit** - these used to be their own buttons in the
+  header; they're grouped into this menu now to keep the window small.
+  Arrow keys move through the menu, Enter opens the selected item, Esc
+  closes it.
+- **The ✕ button** (top-right corner) closes the app, the same as the
+  normal Windows close button would.
+- **Alt+F4 still closes the app too** - wired by hand, since a window
+  without the normal Windows chrome can't always be assumed to get this
+  automatically.
 
 ## Choosing what to record
 
-Three buttons above the Start button let you choose the source before you
-start recording (they're locked while a recording is in progress):
+A row of icon buttons lets you choose the source before you start
+recording (they're locked while a recording is in progress):
 
 - **Whole Screen** - records the whole primary monitor. This is the default.
 - **A Window** - opens a list of your currently open windows; pick one
@@ -61,9 +96,15 @@ start recording (they're locked while a recording is in progress):
   screen; click and drag to draw a rectangle (or use arrow keys / Shift +
   arrow keys with no mouse at all), then confirm. Only that area is recorded,
   and the saved video is sized to exactly match it.
+- **Record** - the fourth icon button in that same row; starts recording
+  using whichever source is currently selected (same as the old "Start
+  Recording" button).
 
-The currently selected button is highlighted, and the line underneath
-always says exactly what will be recorded.
+The currently selected source button gets a highlighted background and
+border, and the line underneath the row always says exactly what will be
+recorded. Once recording starts, this whole row is replaced by a status
+row (the pulsing dot, "Recording"/"Paused" text, the timer, and
+Pause/Stop icon buttons) - it switches back once you stop.
 
 **While a Custom Area recording is running**, a thin red line stays drawn
 around that exact area for as long as the recording lasts (including while
@@ -100,14 +141,12 @@ Click **Settings** (top of the window, next to About) to open:
   shape (aspect ratio) of what you're recording doesn't match the chosen
   size - for example a narrow window forced into a wide 16:9 size - black
   bars are added on the sides rather than the picture looking squashed.
-- **Background image** - choose a picture of your own (JPG, PNG, BMP, or
-  GIF) to show behind the main window, with a **Choose Image...** button
-  that opens a normal Windows picture picker, and a **Remove** button to
-  go back to the plain dark background. By default (and if you never set
-  one) the plain dark background is used - there is no forced default
-  picture anymore. Whatever you choose is copied into the app's own
-  settings folder, so it keeps working even if you later move, rename, or
-  delete the original picture file.
+- **Appearance** - choose **Dark** (the default) or **Light** as the
+  color theme for every window in the app. Click **Save** and the main
+  window reopens right away with the new colors - no restart needed,
+  unless a recording is in progress, in which case it shows the next
+  time you open Simple Record instead (see "How the theme switch works"
+  below).
 - **Microphone audio** - a checkbox to turn your microphone on or off for
   the next recording. Off (unchecked) by default, meaning the saved video
   has no sound at all, same as before this setting existed. When checked,
@@ -122,9 +161,29 @@ open the app) or **Cancel** to discard them. Everything in this window is
 keyboard accessible (Tab between fields, Alt+underlined-letter for a
 shortcut, Enter to Save, Escape to Cancel).
 
-Settings, including your chosen background image, are stored under
+Settings, including your chosen theme, are stored under
 `%AppData%\Simple Record\` - you never need to open or edit this
 yourself, but it's there if you're curious or want to back it up.
+
+### How the theme switch works
+
+Every window picks its colors once, when it's first opened - WPF doesn't
+repaint an already-open window live when a color setting changes. So
+when you save a new theme choice, Simple Record closes the main window
+and immediately reopens a fresh one in its place - that's why it
+flickers closed and reappears right after you click Save. Settings and
+About pick up the current theme automatically too, since they're
+freshly opened each time you use them - this also required reloading
+the app's shared button/label styles at the same time as the theme
+colors (not just the colors on their own), otherwise a window that had
+already been opened once under the old theme could keep showing some of
+the old theme's colors even after being reopened.
+
+The one exception: if a recording is in progress when you change the
+theme, the main window **can't** be safely closed and reopened mid
+recording, so in that case your choice is saved but won't show until you
+close and reopen the app normally afterward. The status bar message
+tells you which of the two happened.
 
 ## 1. Prerequisites
 
@@ -165,15 +224,21 @@ as "Simple Record".
 
 **Try this to test it:**
 
-1. Press **Alt+S** (or click **Start Recording**).
+As of version 0.8.0 (the redesigned compact window - see "The redesigned
+window" below), the icon buttons don't have Alt-key shortcuts of their
+own anymore - **Tab** to move between them and **Enter** or **Space** to
+press the focused one still works exactly as before, it's just no
+longer also reachable by a specific Alt+letter combination. Clicking
+with the mouse works the same as always.
+
+1. Click (or Tab to and press Enter/Space on) the **Record** icon button.
 2. A confirmation window appears - press **Enter** (or click **Start
    Recording** again) to confirm.
 3. The red dot should start pulsing, the text should say "Recording",
    and the timer should start counting up.
-4. Press **Alt+P** to pause - the dot turns blue/accent-colored and the
-   text says "Paused". Press **Alt+P** again (now labeled "Resume") to
-   continue.
-5. Press **Alt+T** (or click **Stop Recording**).
+4. Click **Pause** - the dot turns blue/accent-colored and the text says
+   "Paused". Click it again (now labeled "Resume") to continue.
+5. Click **Stop**.
 6. After a moment, the status bar at the bottom will show the saved file
    path. Open your **Videos\Simple Record** folder to find it.
 
@@ -181,21 +246,20 @@ If Visual Studio shows a build error the first time, that's normal when
 wiring up a new library for the first time - copy the exact error text
 and we'll fix it together.
 
-## 5. Make a shareable .exe (no installer yet)
+## 5. Make a shareable installer (setup.exe)
 
-This packages the app into its own folder with everything it needs to
-run on another Windows PC - without needing Visual Studio, and without
-needing .NET installed separately on that PC. It still produces an
-ordinary `.exe` you (or a friend) double-click to run.
+This is a two-step process: first you **publish** the app (bundles
+everything it needs into one folder), then you **package** that folder
+into a single `setup.exe` installer that someone else can download and
+run to properly install Simple Record - Start Menu shortcut, an entry in
+"Add or Remove Programs", and a working uninstaller included.
 
-We're skipping a full installer (Start Menu shortcut, uninstaller, etc.)
-for now, since this app is staying free/personal - every installer tool
-we checked (Inno Setup, WiX) has recently added commercial-use licensing
-wrinkles that don't apply to a free personal app, but weren't worth
-adding complexity for right now. See "If you want a proper installer
-later" below if that ever changes.
+If you only want the plain folder-of-files version (no installer, just
+a `.exe` you unzip and double-click), step 5a alone is enough - skip 5b.
+But most people downloading your app will expect a normal installer, so
+5b is recommended.
 
-**Steps:**
+### 5a. Publish the app
 
 1. In Visual Studio, open a terminal: **View → Terminal** (or **Tools →
    Command Line → Developer PowerShell**).
@@ -229,37 +293,84 @@ later" below if that ever changes.
    ```
    (The extra `x64\` segment appears because the project now always
    builds as x64 instead of "Any CPU" - that's expected.)
-   This whole folder (not just the `.exe` on its own) is what you share -
-   the `.exe` needs the other files sitting next to it. Easiest way to
-   share it: right-click the `publish` folder → **Send to → Compressed
-   (zipped) folder**, then send that `.zip`.
-5. To run it: open the `publish` folder (or the unzipped copy on another
-   PC) and double-click `simple-record-by-mrsmith9.exe`.
+   This whole folder is what step 5b packages into `setup.exe` - don't
+   move, rename, or delete anything inside it before running step 5b.
 
-Expect the file size to be noticeably bigger than before (roughly
-150-200 MB) - that's the bundled .NET runtime, not a mistake.
+   (If you only want the plain, no-installer folder version instead:
+   this whole folder, not just the `.exe` on its own, is what you'd
+   share - the `.exe` needs the other files sitting next to it. Easiest
+   way to share it that way: right-click the `publish` folder → **Send
+   to → Compressed (zipped) folder**, then send that `.zip`. Running it
+   is just opening the folder and double-clicking
+   `simple-record-by-mrsmith9.exe` - no install step at all.)
 
-**The first time it runs on a different PC**, Windows may show a blue
-"Windows protected your PC" SmartScreen warning, because the `.exe`
-isn't digitally signed (a code-signing certificate costs money and isn't
+Expect the `publish` folder to be noticeably bigger than a normal
+program (roughly 150-200 MB) - that's the bundled .NET runtime sitting
+inside it, not a mistake. `setup.exe` itself (after step 5b) will be
+smaller than that, because it compresses everything.
+
+### 5b. Package it into setup.exe
+
+This step uses a free, widely-used tool called **Inno Setup** to turn
+the `publish` folder from step 5a into one `setup.exe` file. This only
+needs to be done once per version you want to share - you've already
+got the script that does it (`Installer\SimpleRecord.iss`), so you
+won't need to write anything yourself here.
+
+1. **Install Inno Setup** (only needed the first time): download it
+   free from https://jrsoftware.org/isdl.php and run its own installer
+   with the default options.
+2. Make sure step 5a above has been run and finished without errors -
+   `setup.exe` is built from that `publish` folder, so it needs to
+   exist first.
+3. In File Explorer, go to your project's `Installer` folder:
+   ```
+   C:\Users\ksmit\Documents\Windows app\simple-record-by-mrsmith9\Installer
+   ```
+4. Double-click `SimpleRecord.iss`. This opens it in the **Inno Setup
+   Compiler** window (Inno Setup associates `.iss` files with itself
+   automatically when installed).
+5. Click the green **Compile** (▶) button near the top-left, or press
+   **F9**.
+6. When it finishes (a few seconds), you'll see
+   `Installer\Output\setup.exe`. That one file is the complete
+   installer - it's what you attach to a GitHub Release (see section 6
+   below) or send to someone directly.
+
+**To test it:** double-click `setup.exe`. It should show a normal
+Windows setup wizard - a license-free welcome page, an install location
+page (defaults to Program Files), a checkbox for an optional desktop
+shortcut, then an install progress bar, then a "Finished" page with an
+option to launch the app right away. After installing, check that
+**Simple Record** shows up in your Start Menu, and that it's listed in
+**Settings → Apps → Installed apps** (where it can be uninstalled
+normally, like any other Windows program).
+
+**If you change the app's version number** (in
+`simple-record-by-mrsmith9.csproj`), open `SimpleRecord.iss` in a text
+editor first and update the `MyAppVersion` line near the top to match,
+before re-publishing (5a) and re-compiling (5b) - otherwise the
+installer will report the old version number to Windows even though it
+contains the new build.
+
+**The first time setup.exe runs on a different PC**, Windows may show a
+blue "Windows protected your PC" SmartScreen warning, because it isn't
+digitally signed (a code-signing certificate costs money and isn't
 needed for personal use). Click **More info → Run anyway** to continue.
-That's expected, not a sign something's wrong.
+That's expected, not a sign something's wrong - the same thing happened
+with the plain `.exe` before, and is normal for any unsigned app shared
+this way.
 
-### If you want a proper installer later
-
-If you ever want a polished setup wizard (Start Menu shortcut, an entry
-in "Add or Remove Programs", an uninstaller), two free tools can do
-that - just ask and we'll set one up:
-
-- **Inno Setup** - simpler to write, produces a `.exe` installer. Its
-  license file permits free commercial use, but its website now also
-  asks commercial users to voluntarily buy a license.
-- **WiX Toolset** - produces a real `.msi` (some workplaces specifically
-  require this format). Recently added an "Open Source Maintenance Fee"
-  that can apply if an app built with it earns revenue.
-
-Neither of those licensing wrinkles affects a free personal app like
-this one - they'd only matter if you later decided to sell the app.
+One licensing note, for completeness: Inno Setup's license permits free
+use, including for commercial apps, but its website separately invites
+commercial users to voluntarily pay for a license. That doesn't apply
+here either way, since this is a free personal app - just mentioning it
+so nothing looks hidden. (**WiX Toolset** is the other common free
+option, and produces a real `.msi` file instead of a `.exe` - some
+workplaces specifically require that format - but it recently added an
+"Open Source Maintenance Fee" that can apply if an app built with it
+earns revenue. Neither wrinkle affects this app; say so if you ever want
+to switch to WiX instead.)
 
 ## 6. Checking for updates
 
@@ -284,15 +395,17 @@ breaks in the meantime either way.
 Each time you want the app to notice a new version is out:
 
 1. Bump the version number in `simple-record-by-mrsmith9.csproj`, e.g.
-   `<Version>0.5.0</Version>` -> `<Version>0.6.0</Version>`.
-2. Publish the new build (see section 5 above) and zip the `publish`
-   folder.
+   `<Version>0.5.0</Version>` -> `<Version>0.6.0</Version>` - and also
+   update `MyAppVersion` near the top of `Installer\SimpleRecord.iss` to
+   the same number, so the installer reports the correct version too.
+2. Publish the new build and package it into `setup.exe` (see section 5
+   above, steps 5a and 5b).
 3. On GitHub, go to your repository -> **Releases** -> **Draft a new
    release**.
 4. For the tag, type a **"v" followed by the exact same version number**,
    e.g. `v0.6.0` - this must match, since that's what the app compares
    against. Fill in a title/notes if you like.
-5. Attach the zipped `publish` folder to the release as a file, then
+5. Attach `Installer\Output\setup.exe` to the release as a file, then
    publish it.
 
 The next time the app starts (on any PC running an older version), it
@@ -316,6 +429,10 @@ simple-record-by-mrsmith9/
   simple-record-by-mrsmith9.sln
   README.md
   THIRD_PARTY_NOTICES.md
+  Installer/
+    SimpleRecord.iss                 - Inno Setup script that builds setup.exe
+    Output/                          - setup.exe appears here after compiling
+                                        (created automatically, not checked in)
   src/
     simple-record-by-mrsmith9/
       simple-record-by-mrsmith9.csproj
@@ -327,27 +444,31 @@ simple-record-by-mrsmith9/
         WindowSelectDialog.xaml(.cs)    - "choose a window" list
         RegionSelectWindow.xaml(.cs)    - "drag out a custom area" overlay
         RegionBoundaryOverlay.xaml(.cs) - red border shown during a Custom Area recording
-        SettingsWindow.xaml(.cs)        - save location, quality, background, microphone
+        SettingsWindow.xaml(.cs)        - save location, quality, appearance, microphone
       Services/
         RecordingService.cs             - wraps the recording engine
         UpdateChecker.cs                - checks GitHub Releases for a newer version
         SettingsService.cs              - loads/saves settings.json in %AppData%
+        ThemeManager.cs                 - switches between the Dark/Light color dictionaries
       Models/
         RecordingState.cs               - Idle / Recording / Paused
         RecordingSourceMode.cs          - FullScreen / Window / Region
         RecordingSourceSelection.cs     - the current "what to record" choice
         WindowInfo.cs                   - a simple, app-level window reference
-        AppSettings.cs                  - save folder, quality, background, microphone choices
+        AppSettings.cs                  - save folder, quality, theme, microphone choices
         VideoResolutionPreset.cs        - Automatic / 720p / 1080p / 2K / 4K / 8K
+        AppTheme.cs                     - Dark / Light
       Resources/
-        Styles.xaml                     - colors, fonts, button styles
+        Styles.xaml                     - fonts, button/card/field styles (not colors - see below)
+        Theme.Dark.xaml                 - the Dark theme's color palette
+        Theme.Light.xaml                - the Light theme's color palette
       Assets/
         AppIcon.ico                     - app icon (title bar/taskbar/.exe)
 ```
 
-Note: there is no longer a bundled background image file. A chosen
-background image is copied into `%AppData%\Simple Record\Background\`
-instead (see "Settings" above), not stored inside the project.
+Note: there is no longer a background-image feature or a bundled
+background image file - every window just uses the chosen theme's
+plain background color (see "Settings" above).
 
 Note: inside the C# code itself (the `namespace` lines at the top of each
 `.cs`/`.xaml` file), everything is organized under `SimpleRecord` rather
@@ -379,11 +500,12 @@ settings) mostly involve editing one file.
    app window) and a small always-on-top recording indicator so it's
    obvious recording is active even if the main window is minimized.
 6. **Part 6 (partial)**: Visual polish. ~~Custom app icon~~ - **done**.
-   Theme refinement and a possible high-contrast/light-dark toggle are
-   still open.
-7. ~~Part 7: Packaging - a shareable `.exe` via `dotnet publish`~~ -
-   **done** (a polished installer with Start Menu/uninstaller is still
-   optional and not yet built - see section 5 above).
+   ~~Theme refinement~~ - **done**. ~~A Dark/Light theme toggle~~ -
+   **done**, see item 14 below. A high-contrast theme is still open.
+7. ~~Part 7: Packaging - a shareable `.exe` via `dotnet publish`, and a
+   proper `setup.exe` installer (Start Menu shortcut, uninstaller, "Add
+   or Remove Programs" entry) via Inno Setup~~ - **done** - see section
+   5 above.
 8. ~~Part 8: Startup update check (GitHub Releases)~~ - **done** and
    fully live, pointed at your GitHub repo - see section 6 above.
 9. ~~Part 9: Renamed the app to "Simple Record" (display name) and its
@@ -392,3 +514,12 @@ settings) mostly involve editing one file.
     user-chosen one, set from Settings~~ - **done**.
 11. ~~Part 11: Microphone on/off toggle (part of Part 3), and a visible
     red border around Custom Area recordings while they run~~ - **done**.
+12. ~~Part 12: a `setup.exe` installer via Inno Setup~~ - **done**.
+13. ~~Part 13: redesigned the main window as a compact toolbar (icon
+    buttons, custom title bar), inspired by a reference app called
+    CaptureWiz~~ - **done**, confirmed working by Kyle (2026-10-07),
+    aside from the two issues fixed in item 14 below.
+14. ~~Part 14: removed the multi-color gradient stripe above the title
+    bar and the background-image feature (both flagged by Kyle after
+    testing item 13), and added a Dark/Light theme choice in Settings~~ -
+    **done**, not yet confirmed working by Kyle.

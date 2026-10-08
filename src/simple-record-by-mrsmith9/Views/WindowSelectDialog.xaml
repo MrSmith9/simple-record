@@ -22,7 +22,7 @@
             Use the Up and Down arrow keys to move through the list, then press Enter - or click a window, then click Select.
         </TextBlock>
 
-        <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="4">
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="4">
             <Grid>
                 <ListBox x:Name="WindowListBox" Background="Transparent" BorderThickness="0" FontSize="16"
                          Foreground="{StaticResource TextPrimaryBrush}" Padding="8"

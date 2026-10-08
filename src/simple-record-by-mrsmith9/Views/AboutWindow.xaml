@@ -18,7 +18,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Simple Record" Style="{StaticResource HeadingText}"/>
-        <TextBlock Grid.Row="1" Text="Version 0.7.0 - core recording + source selection + update checking + settings + microphone"
+        <TextBlock Grid.Row="1" Text="Version 0.9.3 - compact toolbar design + Dark/Light theme (instant switching) + core recording + source selection + update checking + settings + microphone"
                    Style="{StaticResource BodyText}" Margin="0,4,0,16"/>
 
         <StackPanel Grid.Row="2">

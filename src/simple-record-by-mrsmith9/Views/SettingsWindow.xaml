@@ -26,15 +26,14 @@
                 <TextBlock Text="Settings" Style="{StaticResource HeadingText}" Margin="0,0,0,20"/>
 
                 <!-- Save location -->
-                <TextBlock Text="Save recordings to:" Style="{StaticResource BodyText}"
-                            FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
+                <TextBlock Text="Save recordings to:" Style="{StaticResource FieldLabel}"/>
 
-                <Grid Margin="0,0,0,24">
+                <Grid Margin="0,0,0,20">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}" CornerRadius="6"
+                    <Border Grid.Column="0" Style="{StaticResource FieldBox}"
                             Padding="10,8" Margin="0,0,10,0">
                         <TextBlock x:Name="OutputFolderText" Style="{StaticResource BodyText}"
                                    TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
@@ -44,24 +43,24 @@
                             AutomationProperties.HelpText="Opens a folder picker to choose where recordings are saved."/>
                 </Grid>
 
-                <!-- Recording quality -->
-                <TextBlock Text="Recording quality (output size):" Style="{StaticResource BodyText}"
-                            FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
+                <Border Style="{StaticResource Divider}" Margin="0,0,0,20"/>
 
-                <StackPanel Margin="0,0,0,24">
-                    <RadioButton x:Name="AutomaticRadio" GroupName="Resolution"
-                                 Content="_Automatic (matches what you're recording) - Recommended"
-                                 Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
-                    <RadioButton x:Name="R720Radio" GroupName="Resolution" Content="_720p HD (1280 x 720)"
-                                 Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
-                    <RadioButton x:Name="R1080Radio" GroupName="Resolution" Content="1_080p Full HD (1920 x 1080)"
-                                 Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
-                    <RadioButton x:Name="R1440Radio" GroupName="Resolution" Content="_2K / 1440p (2560 x 1440)"
-                                 Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
-                    <RadioButton x:Name="R2160Radio" GroupName="Resolution" Content="_4K UHD (3840 x 2160)"
-                                 Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
-                    <RadioButton x:Name="R4320Radio" GroupName="Resolution" Content="_8K UHD (7680 x 4320)"
-                                 Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,14"/>
+                <!-- Recording quality -->
+                <TextBlock Text="Recording quality (output size):" Style="{StaticResource FieldLabel}"/>
+
+                <StackPanel Margin="0,0,0,20">
+                    <RadioButton x:Name="AutomaticRadio" GroupName="Resolution" Style="{StaticResource ThemedRadioButton}"
+                                 Content="_Automatic (matches what you're recording) - Recommended" Margin="0,0,0,10"/>
+                    <RadioButton x:Name="R720Radio" GroupName="Resolution" Style="{StaticResource ThemedRadioButton}"
+                                 Content="_720p HD (1280 x 720)" Margin="0,0,0,10"/>
+                    <RadioButton x:Name="R1080Radio" GroupName="Resolution" Style="{StaticResource ThemedRadioButton}"
+                                 Content="1_080p Full HD (1920 x 1080)" Margin="0,0,0,10"/>
+                    <RadioButton x:Name="R1440Radio" GroupName="Resolution" Style="{StaticResource ThemedRadioButton}"
+                                 Content="_2K / 1440p (2560 x 1440)" Margin="0,0,0,10"/>
+                    <RadioButton x:Name="R2160Radio" GroupName="Resolution" Style="{StaticResource ThemedRadioButton}"
+                                 Content="_4K UHD (3840 x 2160)" Margin="0,0,0,10"/>
+                    <RadioButton x:Name="R4320Radio" GroupName="Resolution" Style="{StaticResource ThemedRadioButton}"
+                                 Content="_8K UHD (7680 x 4320)" Margin="0,0,0,14"/>
 
                     <TextBlock Style="{StaticResource BodyText}" FontSize="13" TextWrapping="Wrap" Opacity="0.85">
                         Choosing a size bigger than what you're actually recording does not add
@@ -72,41 +71,31 @@
                     </TextBlock>
                 </StackPanel>
 
-                <!-- Background image -->
-                <TextBlock Text="Background image:" Style="{StaticResource BodyText}"
-                            FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
+                <Border Style="{StaticResource Divider}" Margin="0,0,0,20"/>
 
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}" CornerRadius="6"
-                            Padding="10,8" Margin="0,0,10,0">
-                        <TextBlock x:Name="BackgroundStatusText" Style="{StaticResource BodyText}"
-                                   TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-                    </Border>
-                    <Button Grid.Column="1" x:Name="ChooseBackgroundButton" Content="Choose _Image..." Style="{StaticResource SecondaryButton}"
-                            Margin="0,0,10,0" Click="ChooseBackgroundButton_Click"
-                            AutomationProperties.HelpText="Opens a picture picker to choose an image to show behind the main window."/>
-                    <Button Grid.Column="2" x:Name="RemoveBackgroundButton" Content="_Remove" Style="{StaticResource SecondaryButton}"
-                            Click="RemoveBackgroundButton_Click"
-                            AutomationProperties.HelpText="Removes the background image and goes back to the plain dark background."/>
-                </Grid>
+                <!-- Appearance (theme) -->
+                <TextBlock Text="Appearance:" Style="{StaticResource FieldLabel}"/>
 
-                <TextBlock Style="{StaticResource BodyText}" FontSize="13" TextWrapping="Wrap"
-                           Opacity="0.85" Margin="0,8,0,0">
-                    Shows a picture of your choice behind the main window (not behind this
-                    Settings window, or any other window). Accepts JPG, PNG, BMP, or GIF
-                    files. Leave this empty to use the plain dark background, same as
-                    every other window in the app.
+                <StackPanel Margin="0,0,0,8">
+                    <RadioButton x:Name="DarkThemeRadio" GroupName="Theme" Style="{StaticResource ThemedRadioButton}"
+                                 Content="_Dark (Recommended)" Margin="0,0,0,10"/>
+                    <RadioButton x:Name="LightThemeRadio" GroupName="Theme" Style="{StaticResource ThemedRadioButton}"
+                                 Content="_Light" Margin="0,0,0,10"/>
+                </StackPanel>
+
+                <TextBlock Style="{StaticResource BodyText}" FontSize="13" TextWrapping="Wrap" Opacity="0.85">
+                    Changes the colors used by every window in the app. Click Save and
+                    the main window will reopen right away with the new colors (unless
+                    a recording is in progress, in which case it shows next time you
+                    open Simple Record instead).
                 </TextBlock>
 
+                <Border Style="{StaticResource Divider}" Margin="0,20,0,20"/>
+
                 <!-- Microphone -->
-                <StackPanel Margin="0,20,0,28">
-                    <CheckBox x:Name="MicrophoneCheckBox" Content="_Microphone audio"
-                              Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"
+                <StackPanel Margin="0,0,0,28">
+                    <CheckBox x:Name="MicrophoneCheckBox" Content="_Microphone audio" Style="{StaticResource ThemedCheckBox}"
+                              FontWeight="SemiBold"
                               AutomationProperties.HelpText="When checked, your microphone is recorded into the video's sound track."/>
                     <TextBlock Style="{StaticResource BodyText}" FontSize="13" TextWrapping="Wrap" Opacity="0.85" Margin="0,6,0,0">
                         When checked, your default microphone is recorded into the video's

@@ -24,7 +24,7 @@
                        Fill="#334F8EF7" Visibility="Collapsed" IsHitTestVisible="False"/>
         </Canvas>
 
-        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="20,14"
+        <Border Style="{StaticResource CardBorder}" Padding="20,14"
                 HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,24,0,0">
             <StackPanel>
                 <TextBlock Text="Click and drag to select an area to record."

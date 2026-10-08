@@ -18,15 +18,16 @@ namespace SimpleRecord.Models
         public VideoResolutionPreset Resolution { get; set; } = VideoResolutionPreset.Automatic;
 
         /// <summary>
-        /// Full path to a user-chosen picture to show behind the main
-        /// window, or null to use the plain dark background (the default,
-        /// and what every other window in the app always uses). This is
-        /// always a copy stored inside the app's own AppData folder (made
-        /// by <see cref="Services.SettingsService.SaveBackgroundImage"/>),
-        /// never the original file the user picked - that way it keeps
-        /// working even if the original file is later moved or deleted.
+        /// Which color theme every window in the app is drawn in. Changing
+        /// this in Settings is saved immediately and, while nothing is
+        /// recording, shows right away (the main window reopens itself
+        /// with the new colors - see <see cref="Services.ThemeManager"/>
+        /// and MainWindow.xaml.cs's SettingsButton_Click). If a recording
+        /// is in progress when it's changed, it takes effect the next time
+        /// the app is opened instead, since the main window can't safely
+        /// be replaced mid-recording.
         /// </summary>
-        public string? BackgroundImagePath { get; set; }
+        public AppTheme Theme { get; set; } = AppTheme.Dark;
 
         /// <summary>
         /// Whether to record audio from the microphone. Off by default,

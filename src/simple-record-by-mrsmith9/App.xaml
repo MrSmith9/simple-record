@@ -1,10 +1,23 @@
+<!-- There is no StartupUri here on purpose: App.xaml.cs's OnStartup loads
+     the user's saved theme choice and applies it (see Services/
+     ThemeManager.cs) BEFORE creating MainWindow, so the very first window
+     shown already has the right colors - StartupUri would create
+     MainWindow immediately, too early for that to happen. -->
 <Application x:Class="SimpleRecord.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="MainWindow.xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!-- Theme.Dark.xaml is merged here as a safe, always-valid
+                     default (so the app can never end up with missing
+                     colors). Services/ThemeManager.cs swaps it out for
+                     Theme.Light.xaml at startup if the user has chosen
+                     Light in Settings. Styles.xaml must stay listed AFTER
+                     the theme dictionary, since it refers to color keys
+                     (AccentBrush, BorderBrush, etc.) that the theme
+                     dictionary is what defines. -->
+                <ResourceDictionary Source="Resources/Theme.Dark.xaml"/>
                 <ResourceDictionary Source="Resources/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

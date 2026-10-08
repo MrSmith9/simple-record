@@ -3,122 +3,255 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Simple Record"
         Icon="/Assets/AppIcon.ico"
-        Width="860" Height="580"
-        MinWidth="680" MinHeight="480"
+        Width="460"
+        SizeToContent="Height"
         WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="False"
+        ResizeMode="NoResize"
         Background="{StaticResource BackgroundBrush}"
-        FontFamily="Segoe UI">
+        FontFamily="Segoe UI"
+        PreviewKeyDown="Window_PreviewKeyDown">
 
-    <Grid>
-        <!-- Background image: hidden (Collapsed) unless the user has chosen
-             one in Settings. MainWindow.xaml.cs sets Source and Visibility
-             together in ApplyBackgroundImage() - this starts empty/hidden
-             so the plain BackgroundBrush shows by default, same as every
-             other window in the app. Stretch="UniformToFill" crops it to
-             fill the window at any size without distorting it. -->
-        <Image x:Name="BackgroundImage" Stretch="UniformToFill" Visibility="Collapsed"/>
+    <!-- 2026-10-07: redesigned as a small, compact toolbar (inspired by a
+         reference app, CaptureWiz, that Kyle shared a picture of) instead
+         of the previous large centered window. Since there's no normal
+         Windows title bar anymore (WindowStyle="None"), this window draws
+         its own "Simple Record" row below, with its own menu and close
+         buttons - dragging the window is handled by MainWindow.xaml.cs's
+         TitleBar_MouseLeftButtonDown, and Alt+F4 is wired by hand too
+         (Window_PreviewKeyDown) as a safety net, since a custom title bar
+         can't be assumed to get that for free the way a normal window does.
 
-        <!-- A dark, semi-transparent layer on top of the image, so text and
-             buttons stay easy to read no matter what's underneath them.
-             Only shown together with BackgroundImage. Raise the last two
-             alpha digits (currently "B3", ~70% opaque) for more contrast,
-             or lower them to show more of the image. -->
-        <Rectangle x:Name="BackgroundScrim" Fill="#B3101119" Visibility="Collapsed"/>
+         2026-10-08: the decorative multi-color gradient stripe that used
+         to sit above the title bar, and the optional background image
+         behind this window, have both been removed.
 
-    <Grid Margin="32">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+         The outer Border just draws a crisp 1px edge all the way around -
+         without a normal window chrome, that edge doesn't appear on its
+         own on every Windows version. -->
+    <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Background="{StaticResource BackgroundBrush}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- Update notice: hidden unless a newer version is found at
-             startup. Purely visual, no sound - and fully keyboard
-             reachable (Tab to it; Enter on "Get It" opens the download
-             page; Tab to "Dismiss" and press Enter/Space to hide it). -->
-        <Border x:Name="UpdateNoticeBorder" Grid.Row="0" Background="{StaticResource AccentBrush}"
-                CornerRadius="8" Padding="16,10" Margin="0,0,0,16" Visibility="Collapsed">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock x:Name="UpdateNoticeText" Grid.Column="0" Text="A new version is available."
-                           VerticalAlignment="Center" FontWeight="SemiBold" Foreground="White" TextWrapping="Wrap"/>
-                <Button x:Name="UpdateGetItButton" Grid.Column="1" Content="_Get It" Style="{StaticResource SecondaryButton}"
-                        Margin="12,0,8,0" Click="UpdateGetItButton_Click"
-                        AutomationProperties.HelpText="Opens the download page for the new version in your browser."/>
-                <Button x:Name="UpdateDismissButton" Grid.Column="2" Content="_Dismiss" Style="{StaticResource SecondaryButton}"
-                        Click="UpdateDismissButton_Click"
-                        AutomationProperties.HelpText="Hides this notice for now. It will check again next time the app starts."/>
-            </Grid>
-        </Border>
+            <!-- Row 0: custom title bar. Click-and-drag anywhere on this
+                 row (except the two buttons) moves the window, the same as
+                 dragging a normal title bar would. -->
+            <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}"
+                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Grid Margin="10,0,6,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-        <!-- Header -->
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Text="Simple Record" Style="{StaticResource HeadingText}"
-                       VerticalAlignment="Center"/>
-            <Button Grid.Column="1" x:Name="SettingsButton" Content="S_ettings" Style="{StaticResource SecondaryButton}"
-                    Margin="0,0,10,0" Click="SettingsButton_Click"
-                    AutomationProperties.HelpText="Choose where recordings are saved and what size to record at."/>
-            <Button Grid.Column="2" x:Name="AboutButton" Content="_About" Style="{StaticResource SecondaryButton}"
-                    Click="AboutButton_Click"
-                    AutomationProperties.HelpText="Opens the About window with app information and copyright."/>
+                    <Image Grid.Column="0" Source="/Assets/AppIcon.ico" Width="18" Height="18"
+                           Margin="0,0,8,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                    <TextBlock Grid.Column="1" Text="Simple Record" FontWeight="Bold" FontSize="14"
+                               Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"
+                               IsHitTestVisible="False"/>
+
+                    <Button Grid.Column="2" x:Name="MenuButton" Style="{StaticResource TitleBarButton}"
+                            Click="MenuButton_Click" AutomationProperties.Name="Menu"
+                            AutomationProperties.HelpText="Opens Settings, About, and Exit.">
+                        <StackPanel VerticalAlignment="Center">
+                            <Rectangle Width="15" Height="2" RadiusX="1" RadiusY="1"
+                                       Fill="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4"/>
+                            <Rectangle Width="15" Height="2" RadiusX="1" RadiusY="1"
+                                       Fill="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4"/>
+                            <Rectangle Width="15" Height="2" RadiusX="1" RadiusY="1"
+                                       Fill="{StaticResource TextPrimaryBrush}"/>
+                        </StackPanel>
+                        <Button.ContextMenu>
+                            <ContextMenu Style="{StaticResource ThemedContextMenu}">
+                                <MenuItem Header="_Settings" Style="{StaticResource ThemedMenuItem}"
+                                          Click="SettingsButton_Click"/>
+                                <MenuItem Header="_About" Style="{StaticResource ThemedMenuItem}"
+                                          Click="AboutButton_Click"/>
+                                <Separator/>
+                                <MenuItem Header="E_xit" Style="{StaticResource ThemedMenuItem}"
+                                          Click="CloseButton_Click"/>
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                    </Button>
+
+                    <Button Grid.Column="3" x:Name="CloseButton" Style="{StaticResource TitleBarCloseButton}"
+                            Click="CloseButton_Click" AutomationProperties.Name="Close Simple Record">
+                        <Path Width="12" Height="12" Stretch="Uniform" Stroke="{StaticResource TextPrimaryBrush}"
+                              StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                              Data="M0,0 L14,14 M14,0 L0,14"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Row 1: update notice - hidden unless a newer version is
+                 found at startup. Same logic as before, just resized to
+                 fit the narrower window. Purely visual, no sound, and
+                 fully keyboard reachable (Tab to it; Enter on "Get It"
+                 opens the download page; Tab to "Dismiss" and press
+                 Enter/Space to hide it). -->
+            <Border x:Name="UpdateNoticeBorder" Grid.Row="1" Background="{StaticResource AccentBrush}"
+                    Padding="12,8" Margin="10,10,10,0" Visibility="Collapsed"
+                    CornerRadius="{StaticResource FieldRadius}">
+                <StackPanel>
+                    <TextBlock x:Name="UpdateNoticeText" Text="A new version is available."
+                               FontWeight="SemiBold" FontSize="12" Foreground="White" TextWrapping="Wrap"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                        <Button x:Name="UpdateGetItButton" Content="_Get It" Style="{StaticResource SecondaryButton}"
+                                FontSize="11" Padding="10,4" MinWidth="0" MinHeight="0" Margin="0,0,8,0"
+                                Click="UpdateGetItButton_Click"
+                                AutomationProperties.HelpText="Opens the download page for the new version in your browser."/>
+                        <Button x:Name="UpdateDismissButton" Content="_Dismiss" Style="{StaticResource SecondaryButton}"
+                                FontSize="11" Padding="10,4" MinWidth="0" MinHeight="0"
+                                Click="UpdateDismissButton_Click"
+                                AutomationProperties.HelpText="Hides this notice for now. It will check again next time the app starts."/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Row 2: main content - one of two panels is shown at a time,
+                 switched by MainWindow.xaml.cs's SetRecordingUiState():
+                 the "choose what to record + Record" row while idle, or
+                 the live recording status row while recording/paused. -->
+
+            <!-- Idle: choose a source, then press Record. -->
+            <StackPanel x:Name="SourceSelectionPanel" Grid.Row="2" Margin="10,12,10,4">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button x:Name="FullScreenSourceButton" Style="{StaticResource IconToolButton}"
+                            Margin="0,0,6,0" Click="FullScreenSourceButton_Click"
+                            AutomationProperties.Name="Whole Screen"
+                            AutomationProperties.HelpText="Records your whole primary monitor.">
+                        <StackPanel>
+                            <StackPanel Width="26" HorizontalAlignment="Center" Margin="0,0,0,6">
+                                <Border Width="24" Height="16" CornerRadius="3"
+                                        BorderBrush="{StaticResource AccentBrush}" BorderThickness="2"/>
+                                <Rectangle Width="3" Height="4" Fill="{StaticResource AccentBrush}"
+                                           HorizontalAlignment="Center"/>
+                                <Rectangle Width="12" Height="2" RadiusX="1" RadiusY="1"
+                                           Fill="{StaticResource AccentBrush}" HorizontalAlignment="Center"
+                                           Margin="0,1,0,0"/>
+                            </StackPanel>
+                            <TextBlock Text="Whole Screen" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="WindowSourceButton" Style="{StaticResource IconToolButton}"
+                            Margin="0,0,6,0" Click="WindowSourceButton_Click"
+                            AutomationProperties.Name="A Window"
+                            AutomationProperties.HelpText="Opens a list of your open windows to choose one to record.">
+                        <StackPanel>
+                            <Grid Width="26" Height="20" Margin="0,0,0,6">
+                                <Border BorderBrush="{StaticResource IconPurpleBrush}" BorderThickness="2"
+                                        CornerRadius="3" Background="Transparent"/>
+                                <Border Height="6" VerticalAlignment="Top"
+                                        Background="{StaticResource IconPurpleBrush}" CornerRadius="2,2,0,0"/>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Height="6"
+                                            Margin="4,0,0,0">
+                                    <Ellipse Width="2" Height="2" Fill="{StaticResource SurfaceBrush}"
+                                             VerticalAlignment="Center" Margin="0,0,2,0"/>
+                                    <Ellipse Width="2" Height="2" Fill="{StaticResource SurfaceBrush}"
+                                             VerticalAlignment="Center" Margin="0,0,2,0"/>
+                                    <Ellipse Width="2" Height="2" Fill="{StaticResource SurfaceBrush}"
+                                             VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Text="A Window" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="RegionSourceButton" Style="{StaticResource IconToolButton}"
+                            Margin="0,0,6,0" Click="RegionSourceButton_Click"
+                            AutomationProperties.Name="Custom Area"
+                            AutomationProperties.HelpText="Lets you drag out a custom rectangle to record.">
+                        <StackPanel>
+                            <!-- Four corner brackets, like a crop/viewfinder
+                                 tool - a common, instantly recognizable
+                                 "select an area" icon. -->
+                            <Path Width="24" Height="24" Stretch="Uniform" Margin="0,0,0,6"
+                                  HorizontalAlignment="Center"
+                                  Stroke="{StaticResource IconTealBrush}" StrokeThickness="2.2"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Data="M2,8 L2,2 L8,2 M16,2 L22,2 L22,8 M22,16 L22,22 L16,22 M8,22 L2,22 L2,16"/>
+                            <TextBlock Text="Custom Area" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="StartButton" Style="{StaticResource IconToolButton}"
+                            Click="StartButton_Click"
+                            AutomationProperties.Name="Start Recording"
+                            AutomationProperties.HelpText="Asks for confirmation, then starts recording.">
+                        <StackPanel>
+                            <Grid Width="24" Height="24" Margin="0,0,0,6" HorizontalAlignment="Center">
+                                <Ellipse Width="24" Height="24" Stroke="{StaticResource RecordBrush}"
+                                         StrokeThickness="1.5" Opacity="0.45"/>
+                                <Ellipse Width="16" Height="16" Fill="{StaticResource RecordBrush}"/>
+                            </Grid>
+                            <TextBlock Text="Record" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <TextBlock x:Name="SourceDescriptionText" Text="Recording: Whole screen (primary monitor)"
+                           FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"
+                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                           Margin="0,8,0,0"/>
+            </StackPanel>
+
+            <!-- Recording / Paused: live status + Pause/Stop. Collapsed
+                 (and SourceSelectionPanel shown instead) while idle. -->
+            <StackPanel x:Name="RecordingPanel" Grid.Row="2" Margin="14,12,14,8" Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                    <Ellipse x:Name="IndicatorDot" Width="14" Height="14" Fill="{StaticResource TextSecondaryBrush}"
+                             Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="IndicatorStateText" Text="Not recording" FontSize="15" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"
+                               Margin="0,0,14,0"/>
+                    <TextBlock x:Name="ElapsedTimeText" Text="00:00:00" Style="{StaticResource CompactTimerText}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button x:Name="PauseButton" Style="{StaticResource IconToolButton}"
+                            Margin="0,0,6,0" Click="PauseButton_Click" IsEnabled="False"
+                            AutomationProperties.Name="Pause Recording">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
+                                <Rectangle Width="5" Height="18" RadiusX="2" RadiusY="2"
+                                           Fill="{StaticResource AccentBrush}" Margin="0,0,5,0"/>
+                                <Rectangle Width="5" Height="18" RadiusX="2" RadiusY="2"
+                                           Fill="{StaticResource AccentBrush}"/>
+                            </StackPanel>
+                            <TextBlock x:Name="PauseButtonLabel" Text="Pause" HorizontalAlignment="Center"
+                                       TextAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="StopButton" Style="{StaticResource IconToolButton}"
+                            Click="StopButton_Click" IsEnabled="False"
+                            AutomationProperties.Name="Stop Recording">
+                        <StackPanel>
+                            <Rectangle Width="18" Height="18" RadiusX="4" RadiusY="4"
+                                       Fill="{StaticResource RecordBrush}" HorizontalAlignment="Center"
+                                       Margin="0,0,0,6"/>
+                            <TextBlock Text="Stop" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Row 3: status bar - every status change is written here as
+                 plain text, never only announced through color or an icon. -->
+            <Border Grid.Row="3" Background="{StaticResource SurfaceBrush}" Padding="12,8" Margin="0,8,0,0">
+                <TextBlock x:Name="StatusMessageText" Text="Ready. Click Record to begin."
+                           FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+            </Border>
         </Grid>
-
-        <!-- Center: recording indicator + timer -->
-        <StackPanel Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-                <Ellipse x:Name="IndicatorDot" Width="18" Height="18" Fill="{StaticResource TextSecondaryBrush}"
-                         Margin="0,0,10,0" VerticalAlignment="Center"/>
-                <TextBlock x:Name="IndicatorStateText" Text="Not recording" FontSize="20" FontWeight="SemiBold"
-                           Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-            </StackPanel>
-
-            <TextBlock x:Name="ElapsedTimeText" Text="00:00:00" Style="{StaticResource TimerText}"
-                       HorizontalAlignment="Center"/>
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,24,0,8">
-                <Button x:Name="FullScreenSourceButton" Content="_Whole Screen" Style="{StaticResource SecondaryButton}"
-                        Margin="0,0,10,0" Click="FullScreenSourceButton_Click"
-                        AutomationProperties.HelpText="Records your whole primary monitor."/>
-                <Button x:Name="WindowSourceButton" Content="A _Window" Style="{StaticResource SecondaryButton}"
-                        Margin="0,0,10,0" Click="WindowSourceButton_Click"
-                        AutomationProperties.HelpText="Opens a list of your open windows to choose one to record."/>
-                <Button x:Name="RegionSourceButton" Content="Custom _Area" Style="{StaticResource SecondaryButton}"
-                        Click="RegionSourceButton_Click"
-                        AutomationProperties.HelpText="Lets you drag out a custom rectangle to record."/>
-            </StackPanel>
-
-            <TextBlock x:Name="SourceDescriptionText" Text="Recording: Whole screen (primary monitor)"
-                       Style="{StaticResource BodyText}" HorizontalAlignment="Center"/>
-        </StackPanel>
-
-        <!-- Controls -->
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,24,0,0">
-            <Button x:Name="StartButton" Content="_Start Recording" Style="{StaticResource PrimaryButton}"
-                    Margin="0,0,16,0" Click="StartButton_Click"
-                    AutomationProperties.HelpText="Asks for confirmation, then starts recording your whole screen."/>
-            <Button x:Name="PauseButton" Content="_Pause Recording" Style="{StaticResource SecondaryButton}"
-                    Margin="0,0,16,0" Click="PauseButton_Click" IsEnabled="False"/>
-            <Button x:Name="StopButton" Content="S_top Recording" Style="{StaticResource DangerButton}"
-                    Click="StopButton_Click" IsEnabled="False"/>
-        </StackPanel>
-
-        <!-- Status bar: every status change is written here as plain text,
-             never only announced through color or an icon. -->
-        <Border Grid.Row="4" Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="16,12" Margin="0,24,0,0">
-            <TextBlock x:Name="StatusMessageText" Text="Ready. Press Alt+S or click Start Recording to begin."
-                       Style="{StaticResource StatusText}"/>
-        </Border>
-    </Grid>
-    </Grid>
+    </Border>
 </Window>

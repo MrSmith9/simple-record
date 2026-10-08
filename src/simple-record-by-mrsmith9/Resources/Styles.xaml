@@ -3,26 +3,41 @@
 
     <!-- =====================================================================
          COLORS
-         A dark, high-contrast theme. All status changes (recording, paused,
-         errors) are shown with color + text + icon together, never color
-         alone, and never sound - this app is designed to be fully usable
-         without hearing anything.
+         2026-10-08: colors used to be defined directly in this file. They
+         now live in Resources/Theme.Dark.xaml and Resources/Theme.Light.xaml
+         instead - one of the two is merged into the app's resources ahead
+         of this file (see App.xaml and Services/ThemeManager.cs), and
+         everything below keeps working unchanged either way because it
+         only ever refers to color keys like BackgroundBrush/AccentBrush/
+         etc. by name, never to a color value directly. All status changes
+         (recording, paused, errors) are shown with color + text + icon
+         together, never color alone, and never sound - this app is
+         designed to be fully usable without hearing anything, in either
+         theme.
     ====================================================================== -->
-    <Color x:Key="BackgroundColor">#FF1B1D29</Color>
-    <Color x:Key="SurfaceColor">#FF262939</Color>
-    <Color x:Key="AccentColor">#FF4F8EF7</Color>
-    <Color x:Key="RecordColor">#FFE5484D</Color>
-    <Color x:Key="TextPrimaryColor">#FFF5F5F7</Color>
-    <Color x:Key="TextSecondaryColor">#FFAFB3C7</Color>
-    <Color x:Key="DisabledColor">#FF3D4056</Color>
 
-    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
-    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
-    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
-    <SolidColorBrush x:Key="RecordBrush" Color="{StaticResource RecordColor}"/>
-    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
-    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
-    <SolidColorBrush x:Key="DisabledBrush" Color="{StaticResource DisabledColor}"/>
+    <!-- =====================================================================
+         SHARED MEASUREMENTS
+         One place that decides how rounded things are, so every button,
+         card, and field box in the app stays consistent instead of each
+         window picking its own number.
+    ====================================================================== -->
+    <CornerRadius x:Key="ButtonRadius">10</CornerRadius>
+    <CornerRadius x:Key="CardRadius">12</CornerRadius>
+    <CornerRadius x:Key="FieldRadius">8</CornerRadius>
+
+    <!-- =====================================================================
+         SHADOWS
+         Subtle drop shadows give panels and primary buttons a sense of
+         depth/"lift" instead of looking like flat painted rectangles - a
+         small detail that reads as noticeably more polished and
+         professional. Kept gentle (low opacity, soft blur) so it never
+         becomes a distraction.
+    ====================================================================== -->
+    <DropShadowEffect x:Key="CardShadow" Color="#FF000000" BlurRadius="20" ShadowDepth="4"
+                       Direction="270" Opacity="0.30"/>
+    <DropShadowEffect x:Key="ButtonShadow" Color="#FF000000" BlurRadius="14" ShadowDepth="3"
+                       Direction="270" Opacity="0.28"/>
 
     <!-- =====================================================================
          TEXT STYLES - large, readable sizes throughout.
@@ -52,9 +67,36 @@
         <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
 
+    <!-- A small, semi-bold label used above a field or group of related
+         controls (e.g. "Save recordings to:" in Settings) - gives the app
+         a consistent heading style for sections instead of each window
+         hand-rolling its own FontWeight/Foreground combination. -->
+    <Style x:Key="FieldLabel" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="Margin" Value="0,0,0,8"/>
+    </Style>
+
+    <!-- A thin horizontal rule used to visually separate sections (e.g.
+         between the header and the main content, or between groups of
+         settings) - a common, understated way professional apps divide
+         up a window without needing extra boxes or heavy borders. -->
+    <Style x:Key="Divider" TargetType="Border">
+        <Setter Property="Height" Value="1"/>
+        <Setter Property="Background" Value="{StaticResource BorderBrush}"/>
+    </Style>
+
     <!-- =====================================================================
          BUTTONS - large hit targets, clear hover/pressed/disabled states,
-         and a visible keyboard focus ring (dashed outline).
+         and a visible keyboard focus ring.
+
+         Hover/press feedback is done with a soft white "overlay" layered on
+         top of the button's real color (8% opacity on hover, 16% on press)
+         rather than dimming the whole button's opacity. This keeps the
+         button's own color and its text fully legible at every state - the
+         same technique used by most modern UI toolkits (Fluent, Material) -
+         instead of the washed-out look a plain opacity fade gives.
     ====================================================================== -->
     <Style x:Key="BaseButton" TargetType="Button">
         <Setter Property="FontSize" Value="18"/>
@@ -72,8 +114,13 @@
                     <Setter Property="Control.Template">
                         <Setter.Value>
                             <ControlTemplate>
-                                <Rectangle Margin="-4" StrokeThickness="3" Stroke="White"
-                                           StrokeDashArray="2 2" RadiusX="10" RadiusY="10"/>
+                                <!-- 2026-10-08: uses AccentBrush (not a flat
+                                     white) so the focus ring stays clearly
+                                     visible in both themes - a plain white
+                                     ring would disappear against Theme.
+                                     Light.xaml's white button surfaces. -->
+                                <Rectangle Margin="-4" StrokeThickness="2" Stroke="{StaticResource AccentBrush}"
+                                           RadiusX="12" RadiusY="12"/>
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
@@ -83,19 +130,36 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="10">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           RecognizesAccessKey="True"/>
+                    <Border x:Name="Bg" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource ButtonRadius}">
+                        <Grid>
+                            <!-- Invisible until hovered/pressed - see the
+                                 note above on why this is used instead of
+                                 fading the whole button's opacity. Color
+                                 comes from HoverOverlayBrush (white on the
+                                 dark theme, black on the light theme - see
+                                 Theme.Dark.xaml/Theme.Light.xaml) so this
+                                 still reads clearly whichever theme is
+                                 active, instead of a flat white that would
+                                 vanish against a light/white button. -->
+                            <Border x:Name="HoverOverlay" CornerRadius="{StaticResource ButtonRadius}"
+                                    Background="{StaticResource HoverOverlayBrush}" Opacity="0"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               RecognizesAccessKey="True"/>
+                        </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
+                            <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.08"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Bg" Property="Opacity" Value="0.72"/>
+                            <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.16"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Bg" Property="Background" Value="{StaticResource DisabledBrush}"/>
+                            <Setter TargetName="Bg" Property="BorderBrush" Value="{StaticResource DisabledBrush}"/>
                             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -106,17 +170,299 @@
 
     <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
         <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+        <Setter Property="Effect" Value="{StaticResource ButtonShadow}"/>
     </Style>
 
     <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
         <Setter Property="Background" Value="{StaticResource RecordBrush}"/>
+        <Setter Property="Effect" Value="{StaticResource ButtonShadow}"/>
     </Style>
 
     <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
         <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="MinWidth" Value="140"/>
         <Setter Property="MinHeight" Value="44"/>
         <Setter Property="FontSize" Value="15"/>
+    </Style>
+
+    <!-- =====================================================================
+         RADIO BUTTONS AND CHECKBOXES
+         WPF's default checkbox/radio button chrome follows the Windows
+         system theme, which tends to render as a plain white/light box -
+         this looks out of place and dated against this app's dark theme.
+         These styles redraw them as simple themed circles/boxes using the
+         same accent color as everything else, while leaving all their
+         normal behavior (clicking, Tab/Space from the keyboard, grouping
+         radio buttons by GroupName, the dashed keyboard focus rectangle)
+         completely untouched - only how they're drawn changes.
+    ====================================================================== -->
+    <Style x:Key="ThemedRadioButton" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Padding" Value="10,0,0,0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <StackPanel x:Name="Root" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Grid Width="22" Height="22" VerticalAlignment="Center">
+                            <Ellipse x:Name="OuterCircle" Width="22" Height="22"
+                                     Stroke="{StaticResource TextSecondaryBrush}" StrokeThickness="2"/>
+                            <Ellipse x:Name="InnerDot" Width="11" Height="11"
+                                     Fill="{StaticResource AccentBrush}" Opacity="0"/>
+                        </Grid>
+                        <ContentPresenter Margin="{TemplateBinding Padding}" VerticalAlignment="Center"
+                                           RecognizesAccessKey="True"/>
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="InnerDot" Property="Opacity" Value="1"/>
+                            <Setter TargetName="OuterCircle" Property="Stroke" Value="{StaticResource AccentBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="OuterCircle" Property="Stroke" Value="{StaticResource AccentBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Root" Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ThemedCheckBox" TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Padding" Value="10,0,0,0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <StackPanel x:Name="Root" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Grid Width="22" Height="22" VerticalAlignment="Center">
+                            <Border x:Name="Box" Width="22" Height="22" CornerRadius="5"
+                                    Background="Transparent"
+                                    BorderBrush="{StaticResource TextSecondaryBrush}" BorderThickness="2"/>
+                            <Path x:Name="CheckMark" Opacity="0"
+                                  Data="M4,11 L9,16 L18,5" Stroke="White" StrokeThickness="2.25"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                        </Grid>
+                        <ContentPresenter Margin="{TemplateBinding Padding}" VerticalAlignment="Center"
+                                           RecognizesAccessKey="True"/>
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Box" Property="Background" Value="{StaticResource AccentBrush}"/>
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            <Setter TargetName="CheckMark" Property="Opacity" Value="1"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Root" Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- =====================================================================
+         CARDS / FIELD BOXES
+         Two flavors of "boxed" container used throughout the app:
+         - CardBorder: a grouped panel (the status bar, a list, an
+           instructions box) - gets a visible border and a soft shadow so
+           it visually "lifts" off the background.
+         - FieldBox: a smaller, flatter box just for showing a single piece
+           of text (like a chosen folder path) - a border, but no shadow,
+           so it doesn't compete visually with the real panels.
+    ====================================================================== -->
+    <Style x:Key="CardBorder" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource CardRadius}"/>
+        <Setter Property="Effect" Value="{StaticResource CardShadow}"/>
+    </Style>
+
+    <Style x:Key="FieldBox" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource FieldRadius}"/>
+    </Style>
+
+    <!-- A smaller, compact version of TimerText for the redesigned compact
+         main window (2026-10-07) - the original 54px size was sized for a
+         big centered window and is too large for a slim toolbar. -->
+    <Style x:Key="CompactTimerText" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+    </Style>
+
+    <!-- =====================================================================
+         TOOLBAR ICON BUTTONS (2026-10-07)
+         Used on the redesigned main window - a compact "icon on top, short
+         label underneath" button, inspired by the reference app CaptureWiz.
+         The icon itself is drawn directly in each window's XAML (simple
+         shapes - rectangles, circles, lines - not an icon font), so this
+         style only handles the button's shape/background/hover/focus; it
+         doesn't draw any icon itself.
+
+         Note on accessibility: because each button's Content is a small
+         icon + label layout rather than plain text, RecognizesAccessKey
+         doesn't apply here (there's no plain string for WPF to underline an
+         Alt-key letter in) - every button that uses this style sets
+         AutomationProperties.Name explicitly instead, so screen readers
+         still announce a clear name. Tab + Enter/Space still reaches and
+         activates every one of these buttons normally.
+    ====================================================================== -->
+    <Style x:Key="IconToolButton" TargetType="Button">
+        <Setter Property="Width" Value="88"/>
+        <Setter Property="Height" Value="66"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="FocusVisualStyle">
+            <Setter.Value>
+                <Style>
+                    <Setter Property="Control.Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Rectangle Margin="2" StrokeThickness="2" Stroke="{StaticResource AccentBrush}" RadiusX="8" RadiusY="8"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bg" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource FieldRadius}">
+                        <Grid>
+                            <Border x:Name="HoverOverlay" CornerRadius="{StaticResource FieldRadius}"
+                                    Background="{StaticResource HoverOverlayBrush}" Opacity="0"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.08"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.16"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Small square icon-only buttons for the custom title bar (the menu
+         "hamburger" button and the close "X" button). -->
+    <Style x:Key="TitleBarButton" TargetType="Button">
+        <Setter Property="Width" Value="36"/>
+        <Setter Property="Height" Value="34"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="FocusVisualStyle">
+            <Setter.Value>
+                <Style>
+                    <Setter Property="Control.Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Rectangle Margin="4" StrokeThickness="2" Stroke="{StaticResource AccentBrush}"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bg" Background="{TemplateBinding Background}">
+                        <Grid>
+                            <Border x:Name="HoverOverlay" Background="{StaticResource HoverOverlayBrush}" Opacity="0"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.10"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.18"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Same as TitleBarButton, but turns solid red on hover - the same
+         convention Windows' own title bar close buttons use, so it's
+         instantly recognizable as "this one closes the app." -->
+    <Style x:Key="TitleBarCloseButton" TargetType="Button" BasedOn="{StaticResource TitleBarButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bg" Background="{TemplateBinding Background}">
+                        <Grid>
+                            <Border x:Name="HoverOverlay" Background="{StaticResource RecordBrush}" Opacity="0"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="HoverOverlay" Property="Opacity" Value="1"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.8"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- The "≡" menu button's dropdown (Settings / About / Exit). Only the
+         colors are themed here - everything else (keyboard Up/Down/Enter/
+         Esc navigation, submenu behavior) is left as WPF's normal built-in
+         MenuItem/ContextMenu behavior, so nothing about how it works needs
+         to be rebuilt from scratch. -->
+    <Style x:Key="ThemedContextMenu" TargetType="ContextMenu">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="4"/>
+    </Style>
+
+    <Style x:Key="ThemedMenuItem" TargetType="MenuItem">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Padding" Value="12,8"/>
     </Style>
 
 </ResourceDictionary>

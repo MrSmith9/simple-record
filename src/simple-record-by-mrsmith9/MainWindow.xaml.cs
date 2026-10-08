@@ -1,12 +1,12 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using SimpleRecord.Models;
 using SimpleRecord.Services;
@@ -46,7 +46,6 @@ namespace SimpleRecord
             // opening or get in the way if there's no internet connection.
             Loaded += async (_, _) => await CheckForUpdatesAsync();
 
-            ApplyBackgroundImage();
             UpdateSourceSelectionUi();
 
             // Safety net: if the app is closed while a Custom Area
@@ -56,48 +55,43 @@ namespace SimpleRecord
         }
 
         /// <summary>
-        /// Shows the background image the user chose in Settings (if any)
-        /// behind this window, or hides it so the plain dark background
-        /// shows instead - which is also what happens if no background has
-        /// been chosen, or the saved image can't be loaded for any reason
-        /// (moved, deleted, or corrupted file). This never throws or shows
-        /// an error - a background image is a visual nice-to-have, not
-        /// something the app depends on.
+        /// Lets the user drag the window by clicking and holding anywhere
+        /// on the custom title bar row - with WindowStyle="None" there's no
+        /// normal Windows title bar to drag by default, so this replaces
+        /// that. The menu/close buttons sit on top of this same row but
+        /// still receive their own clicks normally; this only fires when
+        /// the click lands on the title bar itself.
         /// </summary>
-        private void ApplyBackgroundImage()
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            string? path = _settings.BackgroundImagePath;
-            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+            if (e.ButtonState == MouseButtonState.Pressed)
             {
-                BackgroundImage.Source = null;
-                BackgroundImage.Visibility = Visibility.Collapsed;
-                BackgroundScrim.Visibility = Visibility.Collapsed;
-                return;
+                DragMove();
             }
+        }
 
-            try
+        /// <summary>
+        /// A hand-wired Alt+F4 as a safety net. WPF windows are normally
+        /// expected to still close on Alt+F4 even with a custom title bar
+        /// (WindowStyle="None"), but that's hard to verify without being
+        /// able to run the app here - this guarantees it either way.
+        /// </summary>
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F4 && Keyboard.Modifiers == ModifierKeys.Alt)
             {
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                // OnLoad reads the whole file into memory immediately and
-                // releases the file handle, instead of keeping it open for
-                // as long as the image is showing - without this, Settings
-                // couldn't replace or delete the stored background file
-                // while the main window is still open and using it.
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.UriSource = new Uri(path, UriKind.Absolute);
-                bitmap.EndInit();
+                Close();
+            }
+        }
 
-                BackgroundImage.Source = bitmap;
-                BackgroundImage.Visibility = Visibility.Visible;
-                BackgroundScrim.Visibility = Visibility.Visible;
-            }
-            catch
-            {
-                BackgroundImage.Source = null;
-                BackgroundImage.Visibility = Visibility.Collapsed;
-                BackgroundScrim.Visibility = Visibility.Collapsed;
-            }
+        private void MenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            MenuButton.ContextMenu.IsOpen = true;
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
 
         /// <summary>
@@ -193,12 +187,41 @@ namespace SimpleRecord
         {
             SourceDescriptionText.Text = $"Recording: {_sourceSelection.DisplayText}";
 
-            Brush selectedBrush = (Brush)FindResource("AccentBrush");
-            Brush unselectedBrush = (Brush)FindResource("SurfaceBrush");
+            // The selected source button gets a subtle accent-colored tint
+            // behind it plus a solid accent-colored border - two light
+            // touches rather than one solid fill. A solid accent fill
+            // would hide each button's own colored icon (e.g. the blue
+            // "Whole Screen" icon would vanish against a solid blue
+            // background), so this keeps every icon visible no matter
+            // which source is currently selected.
+            //
+            // 2026-10-08: the tint color is now read from the active
+            // theme's AccentBrush at the moment this runs, instead of
+            // being a fixed blue - previously this was hardcoded to the
+            // Dark theme's exact accent blue, so after switching to the
+            // Light theme (a different, deeper blue) the tint and the
+            // border around it would have been two slightly different
+            // blues instead of matching.
+            Brush selectedBorder = (Brush)FindResource("AccentBrush");
+            Color accentColor = selectedBorder is SolidColorBrush accentBrush ? accentBrush.Color : Colors.DodgerBlue;
+            var selectedBackground = new SolidColorBrush(Color.FromArgb(0x26, accentColor.R, accentColor.G, accentColor.B));
+            Brush unselectedBackground = Brushes.Transparent;
+            Brush unselectedBorder = Brushes.Transparent;
 
-            FullScreenSourceButton.Background = _sourceSelection.Mode == RecordingSourceMode.FullScreen ? selectedBrush : unselectedBrush;
-            WindowSourceButton.Background = _sourceSelection.Mode == RecordingSourceMode.Window ? selectedBrush : unselectedBrush;
-            RegionSourceButton.Background = _sourceSelection.Mode == RecordingSourceMode.Region ? selectedBrush : unselectedBrush;
+            SetSourceButtonSelected(FullScreenSourceButton, _sourceSelection.Mode == RecordingSourceMode.FullScreen,
+                selectedBackground, selectedBorder, unselectedBackground, unselectedBorder);
+            SetSourceButtonSelected(WindowSourceButton, _sourceSelection.Mode == RecordingSourceMode.Window,
+                selectedBackground, selectedBorder, unselectedBackground, unselectedBorder);
+            SetSourceButtonSelected(RegionSourceButton, _sourceSelection.Mode == RecordingSourceMode.Region,
+                selectedBackground, selectedBorder, unselectedBackground, unselectedBorder);
+        }
+
+        private static void SetSourceButtonSelected(System.Windows.Controls.Button button, bool isSelected,
+            Brush selectedBackground, Brush selectedBorder, Brush unselectedBackground, Brush unselectedBorder)
+        {
+            button.Background = isSelected ? selectedBackground : unselectedBackground;
+            button.BorderBrush = isSelected ? selectedBorder : unselectedBorder;
+            button.BorderThickness = new Thickness(isSelected ? 1.5 : 0);
         }
 
         private void StartButton_Click(object sender, RoutedEventArgs e)
@@ -295,12 +318,45 @@ namespace SimpleRecord
                 return;
             }
 
+            AppTheme previousTheme = _settings.Theme;
             _settings = settingsWindow.ResultSettings;
-            ApplyBackgroundImage();
             bool saved = SettingsService.Save(_settings);
+
+            // 2026-10-08: switching the theme used to need a full app
+            // restart to actually show (StaticResource colors are only
+            // read once, when a window is built - the open MainWindow
+            // couldn't re-color itself on its own). Kyle reported this as
+            // "click light, not change to light." Fixed below: if the
+            // theme changed and nothing is recording, apply it right away
+            // and replace this window with a freshly-built one, so the
+            // new theme shows immediately without closing the whole app.
+            bool themeChanged = _settings.Theme != previousTheme;
+            if (themeChanged && _recordingService.State == RecordingState.Idle)
+            {
+                ThemeManager.Apply(_settings.Theme);
+                ReopenWithNewTheme();
+                return;
+            }
+
             SetStatus(saved
-                ? "Settings saved."
+                ? (themeChanged
+                    ? "Settings saved. The new theme will show the next time you open Simple Record (it can't switch while a recording is in progress)."
+                    : "Settings saved.")
                 : "Settings are being used for now, but couldn't be saved to disk - they may reset next time you open the app.");
+        }
+
+        /// <summary>
+        /// Replaces this window with a brand new one, so the just-applied
+        /// theme's colors actually show without needing to restart the
+        /// whole app. Safe to call only while idle (not recording) - see
+        /// the caller, SettingsButton_Click.
+        /// </summary>
+        private void ReopenWithNewTheme()
+        {
+            var freshWindow = new MainWindow();
+            Application.Current.MainWindow = freshWindow;
+            freshWindow.Show();
+            Close();
         }
 
         private void OnRecordingCompleted(string filePath)
@@ -326,10 +382,26 @@ namespace SimpleRecord
         /// </summary>
         private void SetRecordingUiState(bool isRecording, bool isPaused)
         {
+            // The idle "choose a source + Record" row and the live
+            // "recording status + Pause/Stop" row occupy the same spot in
+            // the compact window and are swapped based on state, rather
+            // than both being visible at once.
+            SourceSelectionPanel.Visibility = isRecording ? Visibility.Collapsed : Visibility.Visible;
+            RecordingPanel.Visibility = isRecording ? Visibility.Visible : Visibility.Collapsed;
+
             StartButton.IsEnabled = !isRecording;
             PauseButton.IsEnabled = isRecording;
             StopButton.IsEnabled = isRecording;
-            PauseButton.Content = isPaused ? "_Resume Recording" : "_Pause Recording";
+
+            // PauseButton's Content is an icon+label layout, not plain
+            // text, so only the label TextBlock's Text is updated here -
+            // overwriting PauseButton.Content directly would wipe out the
+            // icon. AutomationProperties.Name is updated alongside it so
+            // screen readers still announce "Resume Recording"/"Pause
+            // Recording" correctly (that name isn't read from Content
+            // automatically once Content stops being a plain string).
+            PauseButtonLabel.Text = isPaused ? "Resume" : "Pause";
+            AutomationProperties.SetName(PauseButton, isPaused ? "Resume Recording" : "Pause Recording");
 
             // The source can't be changed mid-recording.
             FullScreenSourceButton.IsEnabled = !isRecording;
